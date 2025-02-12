@@ -1,4 +1,4 @@
-package splash
+package screens
 
 import (
 	"fmt"
@@ -62,7 +62,9 @@ func NewStartScreen(window fyne.Window) fyne.CanvasObject {
 	s.settingsBtn.Disable()
 
 	s.newBtn.OnTapped = func() {
-		log.Println("New Project")
+		w2 := fyne.CurrentApp().NewWindow("New Project")
+		NewProjectScreen(w2)
+		w2.Show()
 	}
 	s.openBtn.OnTapped = func() {
 		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
