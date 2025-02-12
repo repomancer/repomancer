@@ -2,7 +2,7 @@ package main
 
 import (
 	"fyne.io/fyne/v2/app"
-	"repomancer/window/splash"
+	"repomancer/window"
 )
 
 func main() {
@@ -10,7 +10,7 @@ func main() {
 	a := app.NewWithID("com.sheersky.repomancer")
 	w := a.NewWindow("Repomancer")
 
-	screen := splash.NewStartScreen(w)
+	screen := screens.NewStartScreen(w)
 
 	w.SetContent(screen)
 	w.ShowAndRun()

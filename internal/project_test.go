@@ -1,0 +1,72 @@
+package internal
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+const CONFIG_FILE = `
+{
+  "Name": "Test",
+  "Description": "Testing",
+  "Repositories": [
+    {"Name": "github.com/jashort/foo"},
+    {"Name": "github.com/jashort/bar"}
+  ],
+  "ProjectDir": "/var/folders/wm/h0mhbkg91lj2sfcr_g9z5p3h0000gn/T/TestCreateOrOpenProject1573936796/001"
+}
+`
+
+func TestCreateProject(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	project, _ := CreateProject("Test", "Testing", tmpDir)
+
+	if project.ProjectDir != tmpDir {
+		t.Errorf("project dir does not match")
+	}
+}
+
+func TestCreateProject_Fail(t *testing.T) {
+	_, err := CreateProject("Test", "Testing", "/cannotwrite")
+	if err == nil {
+		t.Errorf("error should not be nil")
+	}
+}
+
+func TestOpenExistingProject(t *testing.T) {
+	tmpDir := t.TempDir()
+	f, _ := os.Create(filepath.Join(tmpDir, "config.json"))
+	defer func(f *os.File) {
+		_ = f.Close()
+	}(f)
+	_, _ = f.Write([]byte(CONFIG_FILE))
+
+	project, err := OpenProject(tmpDir)
+
+	if err != nil {
+		t.Errorf("error should be nil, was %v", err)
+	} else {
+		if project.ProjectDir != tmpDir {
+			t.Errorf("project dir does not match")
+		}
+		if project.Name != "Test" {
+			t.Errorf("project name does not match")
+		}
+		if project.Description != "Testing" {
+			t.Errorf("project description does not match")
+		}
+	}
+}
+
+func TestProject_AddRepositoryFromUrl(t *testing.T) {
+	p := new(Project)
+	err := p.AddRepositoryFromUrl("https://github.com/jashort/foo")
+	if err != nil {
+		t.Errorf("error should be nil, was %v", err)
+	}
+	if p.Repositories[0].Title() != "github.com/jashort/foo" {
+		t.Errorf("repository title does not match")
+	}
+}
