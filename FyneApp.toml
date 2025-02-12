@@ -1,0 +1,9 @@
+Website = "https://github.com/jashort/repomancer"
+
+[Details]
+Icon = "Icon.png"
+Name = "Repomancer"
+ID = "com.sheersky.repomancer"
+Version = "0.0.1"
+Build = 1
+
