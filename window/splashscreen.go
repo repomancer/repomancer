@@ -87,8 +87,8 @@ func NewStartScreen(window fyne.Window) fyne.CanvasObject {
 		}, window)
 	}
 	s.settingsBtn.OnTapped = func() {
-		// TODO: settings
 		log.Println("Settings")
+		NewPreferenceScreen()
 	}
 	s.quitBtn.OnTapped = func() {
 		window.Close()
