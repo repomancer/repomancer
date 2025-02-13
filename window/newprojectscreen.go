@@ -87,10 +87,11 @@ func NewProjectScreen(window fyne.Window) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	p.locationEntry.Text = dirname + "/"
+	basePath := fyne.CurrentApp().Preferences().StringWithFallback("baseDirectory", dirname)
+	p.locationEntry.Text = basePath
 
 	p.nameEntry.OnChanged = func(value string) {
-		p.locationEntry.SetText(dirname + "/" + strings.Replace(value, "/", "_", -1))
+		p.locationEntry.SetText(basePath + strings.Replace(value, "/", "_", -1))
 		p.locationEntry.Refresh()
 	}
 
