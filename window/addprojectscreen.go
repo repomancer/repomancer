@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-type ProjectScreen struct {
+type AddProjectScreen struct {
 	nameLbl        *widgets.LabelWithHelp
 	nameEntry      *widgets.ShortcutHandlingEntry
 	locationLbl    *widgets.LabelWithHelp
@@ -26,7 +26,7 @@ type ProjectScreen struct {
 	cancelButton   *widget.Button
 }
 
-func (p *ProjectScreen) Validate() bool {
+func (p *AddProjectScreen) Validate() bool {
 	var errors []string
 	_, err := os.Stat(p.locationEntry.Text)
 	if !os.IsNotExist(err) {
@@ -56,9 +56,9 @@ func (p *ProjectScreen) Validate() bool {
 	}
 }
 
-func NewProjectScreen(state *internal.State) fyne.Window {
+func NewAddProjectScreen(state *internal.State) fyne.Window {
 	w := state.NewHideableWindow("New Project")
-	p := ProjectScreen{
+	p := AddProjectScreen{
 		nameLbl:        widgets.NewLabelWithHelpWidget("Name", "Project Name. Also used for the name of the git branch.\nValid characters: [A-Za-z0-9_-]", w),
 		nameEntry:      widgets.NewShortcutHandlingEntry(w, false),
 		locationLbl:    widgets.NewLabelWithHelpWidget("Location", "Where project data and cloned repositories will be stored. Must not exist.", w),
@@ -107,7 +107,7 @@ func NewProjectScreen(state *internal.State) fyne.Window {
 			p.statusMessage.Refresh()
 			p.okButton.Enable()
 		} else {
-			//MainScreen(window, project)
+			//AddProjectScreen(window, project)
 		}
 	}
 

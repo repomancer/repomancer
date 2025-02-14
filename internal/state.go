@@ -12,6 +12,7 @@ type State struct {
 	OpenWindow       fyne.Window
 	NewProjectWindow fyne.Window
 	SettingsWindow   fyne.Window
+	ProjectWindow    fyne.Window
 	Project          *Project
 }
 
@@ -21,6 +22,10 @@ func (state *State) ShowNewProjectWindow() {
 
 func (state *State) ShowSettingsWindow() {
 	state.SettingsWindow.Show()
+}
+
+func (state *State) ShowProjectWindow() {
+	state.ProjectWindow.Show()
 }
 
 func (state *State) NewHideableWindow(title string) fyne.Window {
