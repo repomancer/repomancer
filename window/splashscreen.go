@@ -77,12 +77,13 @@ func NewStartScreen(state *internal.State) fyne.Window {
 			}
 			s.Logf("Open Project: %s", reader.Path())
 			// TODO: Open Project
-			//project, err := internal.OpenProject(reader.Path())
+			project, err := internal.OpenProject(reader.Path())
 			if err != nil {
 				s.Logf("Failed to open project: %s", err)
 			} else {
-				//log.Printf("Open Project: %s", project)
-				//MainScreen(window, project)
+				log.Printf("Open Project: %s", project)
+				state.Project = project
+				state.ShowProjectWindow()
 			}
 		}, w)
 	}
