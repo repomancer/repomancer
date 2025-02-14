@@ -4,11 +4,19 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
+	"strings"
 )
 
+// ShortcutHandlingEntry is an Entry field that also handles length, allowed characters
+// and handles Cmd-W to hide/close the current window
+// HandleShortcut the function that will be called for Cmd-W
+// AllowedCharacters string containing all valid characters. If "", everything is allowed
+// MaxLength maximum number of characters, or -1 for unlimited
 type ShortcutHandlingEntry struct {
 	widget.Entry
-	HandleShortcut func(*desktop.CustomShortcut)
+	HandleShortcut    func(*desktop.CustomShortcut)
+	AllowedCharacters string
+	MaxLength         int
 }
 
 func (m *ShortcutHandlingEntry) TypedShortcut(s fyne.Shortcut) { //for local
@@ -19,6 +27,18 @@ func (m *ShortcutHandlingEntry) TypedShortcut(s fyne.Shortcut) { //for local
 		t := s.(*desktop.CustomShortcut)
 		if m.HandleShortcut != nil {
 			m.HandleShortcut(t)
+		}
+	}
+}
+
+func (m *ShortcutHandlingEntry) TypedRune(r rune) {
+	if m.MaxLength == -1 || len(m.Text) < m.MaxLength {
+		if m.AllowedCharacters == "" {
+			m.Entry.TypedRune(r)
+		} else {
+			if strings.ContainsRune(m.AllowedCharacters, r) {
+				m.Entry.TypedRune(r)
+			}
 		}
 	}
 }
@@ -35,6 +55,7 @@ func NewShortcutHandlingEntry(window fyne.Window, isMainWindow bool) *ShortcutHa
 			}
 		}
 	}
-
+	item.MaxLength = -1
+	item.AllowedCharacters = ""
 	return item
 }

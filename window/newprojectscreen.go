@@ -2,6 +2,7 @@ package screens
 
 import (
 	"fmt"
+	"repomancer/internal"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -15,7 +16,7 @@ import (
 
 type ProjectScreen struct {
 	nameLbl        *widgets.LabelWithHelp
-	nameEntry      *widgets.BranchNameEntry
+	nameEntry      *widgets.ShortcutHandlingEntry
 	locationLbl    *widgets.LabelWithHelp
 	locationEntry  *widgets.ShortcutHandlingEntry
 	prMessageLbl   *widget.Label
@@ -55,19 +56,21 @@ func (p *ProjectScreen) Validate() bool {
 	}
 }
 
-func NewProjectScreen(window fyne.Window) {
+func NewProjectScreen(state *internal.State) fyne.Window {
+	w := state.NewHideableWindow("New Project")
 	p := ProjectScreen{
-		nameLbl:        widgets.NewLabelWithHelpWidget("Name", "Project Name. Also used for the name of the git branch.\nValid characters: [A-Za-z0-9_-]", window),
-		nameEntry:      widgets.NewBranchNameEntry(),
-		locationLbl:    widgets.NewLabelWithHelpWidget("Location", "Where project data and cloned repositories will be stored. Must not exist.", window),
-		locationEntry:  widgets.NewShortcutHandlingEntry(window, false),
+		nameLbl:        widgets.NewLabelWithHelpWidget("Name", "Project Name. Also used for the name of the git branch.\nValid characters: [A-Za-z0-9_-]", w),
+		nameEntry:      widgets.NewShortcutHandlingEntry(w, false),
+		locationLbl:    widgets.NewLabelWithHelpWidget("Location", "Where project data and cloned repositories will be stored. Must not exist.", w),
+		locationEntry:  widgets.NewShortcutHandlingEntry(w, false),
 		prMessageLbl:   widget.NewLabel("Pull Request\nMessage"),
-		prMessageEntry: widgets.NewShortcutHandlingEntry(window, false),
+		prMessageEntry: widgets.NewShortcutHandlingEntry(w, false),
 		statusMessage:  widget.NewLabel(""),
 		okButton:       widget.NewButton("Create", nil),
 		cancelButton:   widget.NewButton("Cancel", nil),
 	}
-
+	p.nameEntry.AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ0123456789_-"
+	p.nameEntry.MaxLength = 50
 	p.statusMessage.Wrapping = fyne.TextWrapWord
 	p.prMessageEntry.Wrapping = fyne.TextWrapWord
 	p.prMessageEntry.MultiLine = true
@@ -108,12 +111,12 @@ func NewProjectScreen(window fyne.Window) {
 		}
 	}
 
-	p.cancelButton.OnTapped = func() { window.Close() }
+	p.cancelButton.OnTapped = func() { w.Close() }
 
 	grid := container.New(layout.NewFormLayout(), p.nameLbl, p.nameEntry, p.locationLbl, p.locationEntry, p.prMessageLbl, p.prMessageEntry)
 
-	window.Resize(fyne.NewSize(600, 600))
-	window.SetContent(container.NewVBox(grid, p.statusMessage, p.okButton, p.cancelButton))
-	//window.SetMainMenu(fyne.NewMainMenu(ViewMenu()))
-	window.Canvas().Focus(p.nameEntry)
+	w.Resize(fyne.NewSize(600, 600))
+	w.SetContent(container.NewVBox(grid, p.statusMessage, p.okButton, p.cancelButton))
+	w.Canvas().Focus(p.nameEntry)
+	return w
 }

@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"os"
+	"repomancer/internal"
 	"repomancer/window/widgets"
 	"strings"
 )
@@ -18,8 +19,8 @@ type PreferenceScreen struct {
 	cancelButton  *widget.Button
 }
 
-func NewPreferenceScreen() {
-	w := fyne.CurrentApp().NewWindow("Preferences")
+func NewPreferenceScreen(state *internal.State) fyne.Window {
+	w := state.NewHideableWindow("Settings")
 
 	p := PreferenceScreen{
 		locationLbl:   widgets.NewLabelWithHelpWidget("Default Location", "Directory where new projects will be created", w),
@@ -45,19 +46,16 @@ func NewPreferenceScreen() {
 		}
 
 		fyne.CurrentApp().Preferences().SetString("baseDirectory", newLocation)
-
-		if err != nil {
-			p.okButton.Enable()
-		} else {
-			w.Close()
-		}
+		log.Printf("Setting baseDirectory to: %s", newLocation)
+		p.okButton.Enable()
+		w.Hide()
 	}
 
-	p.cancelButton.OnTapped = func() { w.Close() }
+	p.cancelButton.OnTapped = func() { w.Hide() }
 
 	form := container.New(layout.NewFormLayout(), p.locationLbl, p.locationEntry)
 
 	w.Resize(fyne.NewSize(500, 300))
 	w.SetContent(container.NewVBox(form, widget.NewSeparator(), container.NewGridWithColumns(2, p.okButton, p.cancelButton)))
-	w.Show()
+	return w
 }

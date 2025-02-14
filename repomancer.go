@@ -2,16 +2,18 @@ package main
 
 import (
 	"fyne.io/fyne/v2/app"
+	"repomancer/internal"
 	"repomancer/window"
 )
 
 func main() {
 
-	a := app.NewWithID("com.sheersky.repomancer")
-	w := a.NewWindow("Repomancer")
+	state := internal.State{}
+	state.App = app.NewWithID("com.sheersky.repomancer")
+	state.StartWindow = screens.NewStartScreen(&state)
+	state.NewProjectWindow = screens.NewProjectScreen(&state)
+	state.SettingsWindow = screens.NewPreferenceScreen(&state)
 
-	screen := screens.NewStartScreen(w)
+	state.StartWindow.ShowAndRun()
 
-	w.SetContent(screen)
-	w.ShowAndRun()
 }
