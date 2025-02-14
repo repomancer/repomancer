@@ -45,7 +45,9 @@ func checkRequirements() (string, error) {
 	return "Found gh command\n" + stdout, err
 }
 
-func NewStartScreen(window fyne.Window) fyne.CanvasObject {
+func NewStartScreen(state *internal.State) fyne.Window {
+	w := state.NewQuitWindow("Repomancer")
+	w.SetMaster()
 	s := &StartScreen{
 		newBtn:      widget.NewButton("New Project", nil),
 		openBtn:     widget.NewButton("Open Project", nil),
@@ -62,9 +64,7 @@ func NewStartScreen(window fyne.Window) fyne.CanvasObject {
 	s.settingsBtn.Disable()
 
 	s.newBtn.OnTapped = func() {
-		w2 := fyne.CurrentApp().NewWindow("New Project")
-		NewProjectScreen(w2)
-		w2.Show()
+		state.ShowNewProjectWindow()
 	}
 	s.openBtn.OnTapped = func() {
 		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
@@ -84,14 +84,14 @@ func NewStartScreen(window fyne.Window) fyne.CanvasObject {
 				//log.Printf("Open Project: %s", project)
 				//MainScreen(window, project)
 			}
-		}, window)
+		}, w)
 	}
 	s.settingsBtn.OnTapped = func() {
 		log.Println("Settings")
-		NewPreferenceScreen()
+		state.ShowSettingsWindow()
 	}
 	s.quitBtn.OnTapped = func() {
-		window.Close()
+		w.Close()
 	}
 
 	content := container.New(layout.NewVBoxLayout(), s.newBtn, s.openBtn, s.settingsBtn, s.quitBtn, layout.NewSpacer(), s.status)
@@ -112,6 +112,7 @@ func NewStartScreen(window fyne.Window) fyne.CanvasObject {
 	}()
 
 	screen := container.NewBorder(top, nil, nil, nil, content)
-	window.Resize(fyne.NewSize(500, 600))
-	return screen
+	w.SetContent(screen)
+	w.Resize(fyne.NewSize(500, 600))
+	return w
 }
