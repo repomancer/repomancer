@@ -65,14 +65,7 @@ func (pw *ProjectWidget) Select(selectRange SelectRange) {
 			}
 		}
 	}
-	pw.list.Refresh()
-	var msg string
-	if cnt > 0 {
-		msg = fmt.Sprintf("%d/%d Selected (%d added)", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount(), cnt)
-	} else {
-		msg = fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount())
-	}
-	pw.statusLabel.SetText(msg)
+	pw.Refresh()
 }
 
 func (pw *ProjectWidget) PushChanges() {
@@ -114,9 +107,15 @@ func (pw *ProjectWidget) CheckPRStatus() {
 			if err != nil {
 				r.LastCommandResult = err
 			}
-			pw.list.Refresh()
+			pw.Refresh()
 		}
 	}
+}
+
+func (pw *ProjectWidget) Refresh() {
+	pw.list.Refresh()
+	msg := fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount())
+	pw.statusLabel.SetText(msg)
 }
 
 func (pw *ProjectWidget) RunCommand() {
@@ -144,7 +143,7 @@ func (pw *ProjectWidget) AddJobToRepositories(cmd string) {
 			}
 		}
 	}
-	pw.list.Refresh()
+	pw.Refresh()
 }
 
 func (pw *ProjectWidget) ExecuteJobQueue() {
@@ -163,7 +162,7 @@ func (pw *ProjectWidget) ExecuteJobQueue() {
 		for i := 0; i < len(jobsToRun); i++ {
 			pw.statusLabel.SetText(fmt.Sprintf("Running %d/%d", i+1, len(jobsToRun)))
 			jobsToRun[i].Run()
-			pw.list.Refresh()
+			pw.Refresh()
 		}
 	}()
 
@@ -269,7 +268,7 @@ func NewProjectWidget() *ProjectWidget {
 	)
 
 	p.addBtn.OnTapped = func() {
-		// ShowAddRepositoryWindow(project)
+		ShowAddRepositoryWindow(p.project, p.list.Refresh)
 	}
 	p.addMultipleBtn.OnTapped = func() {
 		//ShowAddMultipleRepositoryWindow(project)
