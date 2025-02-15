@@ -15,57 +15,12 @@ import (
 
 type ProjectWidget struct {
 	widget.BaseWidget
-	list           *widget.List
-	statusLabel    *widget.Label
-	commandInput   *widget.Entry
-	runBtn         *widget.Button
-	addBtn         *widget.Button
-	addMultipleBtn *widget.Button
-	project        *internal.Project
-	toolbar        *fyne.Container
-}
-type SelectRange int
-
-const (
-	All SelectRange = iota
-	None
-	Errors
-	TenMore
-)
-
-func (pw *ProjectWidget) Select(selectRange SelectRange) {
-	cnt := 0
-	if selectRange == All {
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			pw.project.GetRepository(i).Selected = true
-			cnt++
-		}
-	} else if selectRange == None {
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			pw.project.GetRepository(i).Selected = false
-		}
-	} else if selectRange == Errors {
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			if pw.project.GetRepository(i).LastCommandResult != nil {
-				pw.project.GetRepository(i).Selected = true
-				cnt++
-			} else {
-				pw.project.GetRepository(i).Selected = false
-			}
-		}
-	} else if selectRange == TenMore {
-		added := 0
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			if !pw.project.GetRepository(i).Selected {
-				if added < 10 {
-					pw.project.GetRepository(i).Selected = true
-					added++
-					cnt++
-				}
-			}
-		}
-	}
-	pw.Refresh()
+	list         *widget.List
+	statusLabel  *widget.Label
+	commandInput *widget.Entry
+	runBtn       *widget.Button
+	project      *internal.Project
+	Toolbar      *ProjectToolbarWidget
 }
 
 func (pw *ProjectWidget) PushChanges() {
@@ -175,7 +130,7 @@ func (pw *ProjectWidget) LoadProject(project *internal.Project) {
 
 func (pw *ProjectWidget) CreateRenderer() fyne.WidgetRenderer {
 
-	header := container.NewBorder(pw.toolbar, nil, nil, pw.runBtn, pw.commandInput)
+	header := container.NewBorder(pw.Toolbar, nil, nil, pw.runBtn, pw.commandInput)
 	footer := container.NewGridWithColumns(1, pw.statusLabel)
 	c := container.NewBorder(header, footer, nil, nil, pw.list)
 
@@ -183,32 +138,21 @@ func (pw *ProjectWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func NewProjectWidget() *ProjectWidget {
-	p := &ProjectWidget{
-		BaseWidget:     widget.BaseWidget{},
-		statusLabel:    widget.NewLabel(""),
-		commandInput:   widget.NewEntry(),
-		addBtn:         widget.NewButton("Add Repository", nil),
-		addMultipleBtn: widget.NewButton("Add Multiple", nil),
-		runBtn:         widget.NewButton("Run", nil),
+	pw := &ProjectWidget{
+		BaseWidget:   widget.BaseWidget{},
+		statusLabel:  widget.NewLabel(""),
+		commandInput: widget.NewEntry(),
+		runBtn:       widget.NewButton("Run", nil),
+		Toolbar:      NewProjectToolbarWidget(),
 	}
 
-	p.addBtn.Importance = widget.HighImportance
-
-	p.commandInput.OnSubmitted = func(s string) {
-		p.RunCommand()
-	}
-
-	p.runBtn.OnTapped = func() {
-		p.RunCommand()
-	}
-
-	p.list = widget.NewList(
-		func() int { return p.project.RepositoryCount() },
+	pw.list = widget.NewList(
+		func() int { return pw.project.RepositoryCount() },
 		func() fyne.CanvasObject {
 			return NewRepositoryWidget("", "")
 		},
 		func(listItemId widget.ListItemID, obj fyne.CanvasObject) {
-			repo := p.project.GetRepository(listItemId)
+			repo := pw.project.GetRepository(listItemId)
 			rw := obj.(*RepositoryWidget)
 			rw.Name.SetText(repo.Title())
 			rw.Status.Bind(binding.BindString(&repo.Status))
@@ -237,7 +181,7 @@ func NewProjectWidget() *ProjectWidget {
 					rw.Selected.SetIcon(theme.CheckButtonIcon())
 				}
 				rw.Selected.Refresh()
-				p.statusLabel.SetText(fmt.Sprintf("%d/%d Selected", p.project.SelectedRepositoryCount(), p.project.RepositoryCount()))
+				pw.statusLabel.SetText(fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount()))
 			}
 			queued := repo.QueuedJobs()
 			if queued > 1 {
@@ -267,49 +211,7 @@ func NewProjectWidget() *ProjectWidget {
 		},
 	)
 
-	p.addBtn.OnTapped = func() {
-		ShowAddRepositoryWindow(p.project, p.list.Refresh)
-	}
-	p.addMultipleBtn.OnTapped = func() {
-		//ShowAddMultipleRepositoryWindow(project)
-	}
+	pw.statusLabel.Importance = widget.LowImportance
 
-	p.toolbar = container.NewHBox(
-		p.addBtn,
-		p.addMultipleBtn,
-		NewContextMenuButton("Select...",
-			fyne.NewMenu("",
-				fyne.NewMenuItem("All", func() { p.Select(All) }),
-				fyne.NewMenuItem("None", func() { p.Select(None) }),
-				fyne.NewMenuItem("Errors", func() { p.Select(Errors) }),
-				fyne.NewMenuItem("10 More", func() { p.Select(TenMore) }),
-			)),
-
-		// Todo: Not implemented
-		//widgets.NewContextMenuButton("Sort...",
-		//	fyne.NewMenu("",
-		//		fyne.NewMenuItem("Checked", func() { Select(All) }),
-		//	)),
-
-		NewContextMenuButton("GitHub...",
-			fyne.NewMenu("",
-				fyne.NewMenuItem("Commit", func() {
-					//ShowCommitWindow(project)
-				}),
-				fyne.NewMenuItem("Push", func() {
-					p.PushChanges()
-				}),
-				fyne.NewMenuItem("Create Pull Request", func() {
-					p.CreatePR()
-				}),
-				fyne.NewMenuItem("Refresh PR status", func() {
-					p.CheckPRStatus()
-				}),
-			),
-		),
-	)
-
-	p.statusLabel.Importance = widget.LowImportance
-
-	return p
+	return pw
 }

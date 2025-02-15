@@ -12,7 +12,6 @@ import (
 	"log"
 	"os"
 	"repomancer/internal"
-	"repomancer/window/widgets"
 )
 
 type StartScreen struct {
@@ -82,15 +81,10 @@ func NewStartScreen(state *internal.State) fyne.Window {
 			if err != nil {
 				s.Logf("Failed to open project: %s", err)
 			} else {
-				log.Printf("Open Project: %s", project)
-				state.Project = project
-				pw := widgets.NewProjectWidget()
-				pw.LoadProject(project)
-				state.ProjectWindow = state.NewQuitWindow(project.Name)
-				state.ProjectWindow.SetContent(pw)
-				state.ProjectWindow.SetMaster()
-				state.ProjectWindow.Resize(fyne.NewSize(900, 600))
-				state.ShowProjectWindow()
+				window := NewProjectWindow(state, project)
+				window.Show()
+				w.Hide()
+
 			}
 		}, w)
 	}
