@@ -16,16 +16,13 @@ type State struct {
 	Project          *Project
 }
 
-func (state *State) ShowNewProjectWindow() {
-	state.NewProjectWindow.Show()
-}
-
 func (state *State) ShowSettingsWindow() {
 	state.SettingsWindow.Show()
 }
 
 func (state *State) ShowProjectWindow() {
 	state.ProjectWindow.Show()
+	state.StartWindow.Hide()
 }
 
 func (state *State) NewHideableWindow(title string) fyne.Window {

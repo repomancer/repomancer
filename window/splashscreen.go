@@ -12,6 +12,7 @@ import (
 	"log"
 	"os"
 	"repomancer/internal"
+	"repomancer/window/widgets"
 )
 
 type StartScreen struct {
@@ -64,7 +65,7 @@ func NewStartScreen(state *internal.State) fyne.Window {
 	s.settingsBtn.Disable()
 
 	s.newBtn.OnTapped = func() {
-		state.ShowNewProjectWindow()
+		//state.ShowNewProjectWindow()
 	}
 	s.openBtn.OnTapped = func() {
 		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
@@ -83,6 +84,12 @@ func NewStartScreen(state *internal.State) fyne.Window {
 			} else {
 				log.Printf("Open Project: %s", project)
 				state.Project = project
+				pw := widgets.NewProjectWidget()
+				pw.LoadProject(project)
+				state.ProjectWindow = state.NewQuitWindow(project.Name)
+				state.ProjectWindow.SetContent(pw)
+				state.ProjectWindow.SetMaster()
+				state.ProjectWindow.Resize(fyne.NewSize(900, 600))
 				state.ShowProjectWindow()
 			}
 		}, w)
