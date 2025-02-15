@@ -13,7 +13,8 @@ func main() {
 	state.StartWindow = screens.NewStartScreen(&state)
 	state.NewProjectWindow = screens.NewAddProjectScreen(&state)
 	state.SettingsWindow = screens.NewPreferenceScreen(&state)
-	state.ProjectWindow = screens.NewProjectScreen(&state)
+	state.ProjectWindow = screens.NewProjectWindow(&state)
+
 	state.StartWindow.ShowAndRun()
 
 }
