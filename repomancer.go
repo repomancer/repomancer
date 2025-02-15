@@ -2,6 +2,8 @@ package main
 
 import (
 	"fyne.io/fyne/v2/app"
+	"log"
+	"os"
 	"repomancer/internal"
 	"repomancer/window"
 )
@@ -13,8 +15,15 @@ func main() {
 	state.StartWindow = screens.NewStartScreen(&state)
 	state.NewProjectWindow = screens.NewAddProjectScreen(&state)
 	state.SettingsWindow = screens.NewPreferenceScreen(&state)
-	state.ProjectWindow = screens.NewProjectWindow(&state)
 
-	state.StartWindow.ShowAndRun()
-
+	if len(os.Args) < 2 {
+		state.StartWindow.ShowAndRun()
+	} else {
+		project, err := internal.OpenProject(os.Args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+		window := screens.NewProjectWindow(&state, project)
+		window.ShowAndRun()
+	}
 }

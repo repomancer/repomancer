@@ -12,6 +12,49 @@ import (
 	"sync"
 )
 
+type SelectRange int
+
+const (
+	All SelectRange = iota
+	None
+	Errors
+	TenMore
+)
+
+func (p *Project) Select(selectRange SelectRange) {
+	cnt := 0
+	if selectRange == All {
+		for i := 0; i < p.RepositoryCount(); i++ {
+			p.GetRepository(i).Selected = true
+			cnt++
+		}
+	} else if selectRange == None {
+		for i := 0; i < p.RepositoryCount(); i++ {
+			p.GetRepository(i).Selected = false
+		}
+	} else if selectRange == Errors {
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if p.GetRepository(i).LastCommandResult != nil {
+				p.GetRepository(i).Selected = true
+				cnt++
+			} else {
+				p.GetRepository(i).Selected = false
+			}
+		}
+	} else if selectRange == TenMore {
+		added := 0
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if !p.GetRepository(i).Selected {
+				if added < 10 {
+					p.GetRepository(i).Selected = true
+					added++
+					cnt++
+				}
+			}
+		}
+	}
+}
+
 type Project struct {
 	mu           sync.Mutex
 	Name         string
