@@ -1,6 +1,7 @@
 package screens
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"log"
@@ -48,7 +49,13 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		log.Println("Commit not implemented")
 	}
 	pw.Toolbar.GitPush.Action = func() {
-		log.Println("Push not implemented")
+		cmd := fmt.Sprintf("git push origin '%s'", project.Name)
+
+		project.AddInternalJobToRepositories(cmd, func(job *internal.Job) {
+			log.Printf("Job complete: %s", job.Duration())
+		})
+		pw.Refresh()
+		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
 		log.Println("Open Pull Request not implemented")

@@ -5,12 +5,30 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"os/exec"
 	"repomancer/internal"
 )
+
+func ShowLogWindow(repository *internal.Repository) {
+	w2 := fyne.CurrentApp().NewWindow(repository.Title())
+	cmdW := &desktop.CustomShortcut{KeyName: fyne.KeyW, Modifier: fyne.KeyModifierSuper}
+
+	w2.Canvas().AddShortcut(cmdW, func(shortcut fyne.Shortcut) {
+		w2.Hide()
+	})
+	logText := NewShortcutHandlingEntry(w2, false)
+	logText.MultiLine = true
+	logText.Wrapping = fyne.TextWrapWord
+
+	logText.Bind(repository.GetLogBinding())
+	w2.Resize(fyne.NewSize(800, 800))
+	w2.SetContent(logText)
+	w2.Show()
+}
 
 type ProjectWidget struct {
 	widget.BaseWidget
@@ -164,7 +182,7 @@ func NewProjectWidget() *ProjectWidget {
 			}
 			rw.LogsBtn.OnTapped = func() {
 				log.Printf("Viewing logs for %s", repo.Name)
-				//ShowLogWindow(repo)
+				ShowLogWindow(repo)
 			}
 			if repo.JobCount() == 0 {
 				rw.LogsBtn.Disable()
