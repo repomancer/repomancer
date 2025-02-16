@@ -10,15 +10,14 @@ import (
 	"log"
 	"os/exec"
 	"repomancer/internal"
-	"strings"
 )
 
 type ProjectWidget struct {
 	widget.BaseWidget
 	list         *widget.List
 	statusLabel  *widget.Label
-	commandInput *widget.Entry
-	runBtn       *widget.Button
+	CommandInput *widget.Entry
+	RunBtn       *widget.Button
 	project      *internal.Project
 	Toolbar      *ProjectToolbarWidget
 }
@@ -73,34 +72,6 @@ func (pw *ProjectWidget) Refresh() {
 	pw.statusLabel.SetText(msg)
 }
 
-func (pw *ProjectWidget) RunCommand() {
-	cmd := strings.TrimSpace(pw.commandInput.Text)
-	log.Println("cmd:", cmd)
-	pw.commandInput.SetText("")
-	pw.commandInput.Refresh()
-	pw.AddJobToRepositories(cmd)
-	pw.ExecuteJobQueue()
-}
-
-func (pw *ProjectWidget) AddJobToRepositories(cmd string) {
-	if pw.project.SelectedRepositoryCount() == 0 {
-		// Nothing selected, run everywhere
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			j := internal.NewJob(pw.project.GetRepository(i), cmd)
-			pw.project.GetRepository(i).AddJob(j)
-		}
-	} else {
-		// Only run on selected repos
-		for i := 0; i < pw.project.RepositoryCount(); i++ {
-			if pw.project.GetRepository(i).Selected {
-				j := internal.NewJob(pw.project.GetRepository(i), cmd)
-				pw.project.GetRepository(i).AddJob(j)
-			}
-		}
-	}
-	pw.Refresh()
-}
-
 func (pw *ProjectWidget) ExecuteJobQueue() {
 	var jobsToRun []*internal.Job
 
@@ -130,7 +101,7 @@ func (pw *ProjectWidget) LoadProject(project *internal.Project) {
 
 func (pw *ProjectWidget) CreateRenderer() fyne.WidgetRenderer {
 
-	header := container.NewBorder(pw.Toolbar, nil, nil, pw.runBtn, pw.commandInput)
+	header := container.NewBorder(pw.Toolbar, nil, nil, pw.RunBtn, pw.CommandInput)
 	footer := container.NewGridWithColumns(1, pw.statusLabel)
 	c := container.NewBorder(header, footer, nil, nil, pw.list)
 
@@ -141,8 +112,8 @@ func NewProjectWidget() *ProjectWidget {
 	pw := &ProjectWidget{
 		BaseWidget:   widget.BaseWidget{},
 		statusLabel:  widget.NewLabel(""),
-		commandInput: widget.NewEntry(),
-		runBtn:       widget.NewButton("Run", nil),
+		CommandInput: widget.NewEntry(),
+		RunBtn:       widget.NewButton("Run", nil),
 		Toolbar:      NewProjectToolbarWidget(),
 	}
 
