@@ -73,6 +73,26 @@ func (p *Project) AddJobToRepositories(cmd string) {
 	}
 }
 
+func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *Job)) {
+	if p.SelectedRepositoryCount() == 0 {
+		// Nothing selected, run everywhere
+		for i := 0; i < p.RepositoryCount(); i++ {
+			j := NewInternalJob(p.GetRepository(i), cmd)
+			j.OnComplete = onComplete
+			p.GetRepository(i).AddJob(j)
+		}
+	} else {
+		// Only run on selected repos
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if p.GetRepository(i).Selected {
+				j := NewInternalJob(p.GetRepository(i), cmd)
+				j.OnComplete = onComplete
+				p.GetRepository(i).AddJob(j)
+			}
+		}
+	}
+}
+
 type Project struct {
 	mu           sync.Mutex
 	Name         string
