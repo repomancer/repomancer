@@ -6,16 +6,8 @@ import (
 	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
+	"strings"
 )
-
-type ProjectWindow struct {
-	fyne.Window
-	pw *widgets.ProjectWidget
-}
-
-func (w *ProjectWindow) LoadProject(project *internal.Project) {
-	w.pw.LoadProject(project)
-}
 
 func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Window {
 	w := state.NewQuitWindow(project.Name)
@@ -63,6 +55,25 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 	}
 	pw.Toolbar.GitRefreshStatus.Action = func() {
 		log.Println("Refresh Status not implemented")
+	}
+
+	pw.CommandInput.OnSubmitted = func(s string) {
+		cmd := strings.TrimSpace(pw.CommandInput.Text)
+		log.Println("cmd:", cmd)
+		pw.CommandInput.SetText("")
+		pw.CommandInput.Refresh()
+		project.AddJobToRepositories(cmd)
+		pw.ExecuteJobQueue()
+		pw.Refresh()
+	}
+	pw.RunBtn.OnTapped = func() {
+		cmd := strings.TrimSpace(pw.CommandInput.Text)
+		log.Println("cmd:", cmd)
+		pw.CommandInput.SetText("")
+		pw.CommandInput.Refresh()
+		project.AddJobToRepositories(cmd)
+		pw.ExecuteJobQueue()
+		pw.Refresh()
 	}
 
 	return w

@@ -55,6 +55,24 @@ func (p *Project) Select(selectRange SelectRange) {
 	}
 }
 
+func (p *Project) AddJobToRepositories(cmd string) {
+	if p.SelectedRepositoryCount() == 0 {
+		// Nothing selected, run everywhere
+		for i := 0; i < p.RepositoryCount(); i++ {
+			j := NewJob(p.GetRepository(i), cmd)
+			p.GetRepository(i).AddJob(j)
+		}
+	} else {
+		// Only run on selected repos
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if p.GetRepository(i).Selected {
+				j := NewJob(p.GetRepository(i), cmd)
+				p.GetRepository(i).AddJob(j)
+			}
+		}
+	}
+}
+
 type Project struct {
 	mu           sync.Mutex
 	Name         string
