@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
-	"os/exec"
 	"repomancer/internal"
 	"strings"
 )
@@ -85,20 +84,6 @@ func (pw *ProjectWidget) CreatePR() {
 	}
 }
 
-func (pw *ProjectWidget) CheckPRStatus() {
-	selectedCount := pw.project.SelectedRepositoryCount()
-	for i := 0; i < pw.project.RepositoryCount(); i++ {
-		r := pw.project.GetRepository(i)
-		if r.Selected || selectedCount == 0 {
-			err := internal.UpdatePullRequestInfo(r)
-			if err != nil {
-				r.LastCommandResult = err
-			}
-			pw.Refresh()
-		}
-	}
-}
-
 func (pw *ProjectWidget) Refresh() {
 	pw.list.Refresh()
 	msg := fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount())
@@ -158,24 +143,7 @@ func NewProjectWidget() *ProjectWidget {
 		func(listItemId widget.ListItemID, obj fyne.CanvasObject) {
 			repo := pw.project.GetRepository(listItemId)
 			rw := obj.(*RepositoryWidget)
-			rw.Name.SetText(repo.Title())
-			rw.Status.Bind(binding.BindString(&repo.Status))
-			if repo.LastCommandResult != nil {
-				rw.LastCommandResult.SetText(fmt.Sprintf("%s", repo.LastCommandResult))
-			} else {
-				rw.LastCommandResult.SetText("")
-			}
-			if repo.PullRequest != nil {
-				rw.PullRequestInfo.SetText(fmt.Sprintf("%s (%s) %s", repo.PullRequest.Url, repo.PullRequest.Status, repo.PullRequest.StatusCheckRollupState))
-			} else {
-				rw.PullRequestInfo.SetText("")
-			}
-
-			if repo.Selected {
-				rw.Selected.SetIcon(theme.CheckButtonCheckedIcon())
-			} else {
-				rw.Selected.SetIcon(theme.CheckButtonIcon())
-			}
+			rw.Update(repo)
 			rw.Selected.OnTapped = func() {
 				repo.Selected = !repo.Selected
 				log.Printf("%s checked: %t", repo.Name, repo.Selected)
@@ -187,31 +155,7 @@ func NewProjectWidget() *ProjectWidget {
 				rw.Selected.Refresh()
 				pw.statusLabel.SetText(fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount()))
 			}
-			queued := repo.QueuedJobs()
-			if queued > 1 {
-				rw.CommandsCount.SetText(fmt.Sprintf("%d jobs pending", queued))
-			} else if queued == 1 {
-				rw.CommandsCount.SetText(fmt.Sprintf("%d job pending", queued))
-			} else {
-				rw.CommandsCount.SetText("")
-			}
-			rw.LogsBtn.OnTapped = func() {
-				log.Printf("Viewing logs for %s", repo.Name)
-				ShowLogWindow(repo)
-			}
-			if repo.JobCount() == 0 {
-				rw.LogsBtn.Disable()
-			} else {
-				rw.LogsBtn.Enable()
-			}
-			rw.OpenBtn.OnTapped = func() {
-				log.Printf("Opening %s", repo.Name)
-				cmd := exec.Command("open", repo.BaseDir)
-				err := cmd.Run()
-				if err != nil {
-					log.Printf("Error opening %s: %s", repo.BaseDir, err)
-				}
-			}
+
 		},
 	)
 
