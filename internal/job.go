@@ -17,7 +17,7 @@ type Job struct {
 	Repository *Repository
 	Command    string
 	Directory  string
-	StdOut     string
+	StdOut     []string
 	StdErr     string
 	Error      error
 	StartTime  time.Time
@@ -56,6 +56,7 @@ func (j *Job) Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cmd.Stderr = cmd.Stdout
 	// TODO: bufio.NewScanner has a maximum single line length of 4kb and a line longer than
 	// that will cause the program to exit with "bufio.Scanner: token too long".
 	// This seems acceptable for now, but could be better. This isn't really intended to dump
@@ -73,6 +74,7 @@ func (j *Job) Run() {
 	}
 	for scanner.Scan() {
 		j.Repository.Log(scanner.Text())
+		j.StdOut = append(j.StdOut, scanner.Text())
 	}
 	if scanner.Err() != nil {
 		_ = cmd.Process.Kill()

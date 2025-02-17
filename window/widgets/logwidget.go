@@ -23,7 +23,7 @@ func (w *LogWidget) Set(job *internal.Job) {
 	w.Command.SetText(fmt.Sprintf("Command: %s\n", job.Command))
 
 	if len(job.StdOut) > 0 {
-		w.StdOut.SetText(job.StdOut)
+		w.StdOut.SetText(job.StdOut[len(job.StdOut)-1])
 		w.StdOut.Show()
 	} else {
 		w.StdOut.SetText("")
