@@ -55,41 +55,47 @@ func (p *Project) Select(selectRange SelectRange) {
 	}
 }
 
-func (p *Project) AddJobToRepositories(cmd string) {
-	if p.SelectedRepositoryCount() == 0 {
-		// Nothing selected, run everywhere
-		for i := 0; i < p.RepositoryCount(); i++ {
-			j := NewJob(p.GetRepository(i), cmd)
-			p.GetRepository(i).AddJob(j)
+// SelectedRepositories will return only selected repositories if anything is selected, or all repositories
+// if nothing is selected
+func (p *Project) SelectedRepositories() []*Repository {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	var repos []*Repository
+
+	anySelected := false
+	for _, repo := range p.Repositories {
+		if repo.Selected {
+			anySelected = true
+			break
 		}
-	} else {
-		// Only run on selected repos
-		for i := 0; i < p.RepositoryCount(); i++ {
-			if p.GetRepository(i).Selected {
-				j := NewJob(p.GetRepository(i), cmd)
-				p.GetRepository(i).AddJob(j)
+	}
+
+	if anySelected {
+		for i := 0; i < len(p.Repositories); i++ {
+			if p.Repositories[i].Selected {
+				repos = append(repos, p.Repositories[i])
 			}
 		}
+	} else {
+		repos = append(repos, p.Repositories...)
+	}
+	return repos
+}
+
+func (p *Project) AddJobToRepositories(cmd string) {
+	selected := p.SelectedRepositories()
+	for i := 0; i < len(selected); i++ {
+		j := NewJob(selected[i], cmd)
+		selected[i].AddJob(j)
 	}
 }
 
 func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *Job)) {
-	if p.SelectedRepositoryCount() == 0 {
-		// Nothing selected, run everywhere
-		for i := 0; i < p.RepositoryCount(); i++ {
-			j := NewInternalJob(p.GetRepository(i), cmd)
-			j.OnComplete = onComplete
-			p.GetRepository(i).AddJob(j)
-		}
-	} else {
-		// Only run on selected repos
-		for i := 0; i < p.RepositoryCount(); i++ {
-			if p.GetRepository(i).Selected {
-				j := NewInternalJob(p.GetRepository(i), cmd)
-				j.OnComplete = onComplete
-				p.GetRepository(i).AddJob(j)
-			}
-		}
+	selected := p.SelectedRepositories()
+	for i := 0; i < len(selected); i++ {
+		j := NewInternalJob(selected[i], cmd)
+		j.OnComplete = onComplete
+		selected[i].AddJob(j)
 	}
 }
 
