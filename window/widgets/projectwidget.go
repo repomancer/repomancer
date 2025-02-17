@@ -54,36 +54,6 @@ type ProjectWidget struct {
 	Toolbar      *ProjectToolbarWidget
 }
 
-func (pw *ProjectWidget) PushChanges() {
-	selectedCount := pw.project.SelectedRepositoryCount()
-	for i := 0; i < pw.project.RepositoryCount(); i++ {
-		r := pw.project.GetRepository(i)
-		if r.Selected || selectedCount == 0 {
-			result, err := internal.PushChanges(r, pw.project)
-			if err != nil {
-				log.Printf("Error pushing changes on %s:  %v", r.Name, err)
-				return
-			}
-			log.Printf("Pushed changes on %s: %s", r.Name, result)
-		}
-	}
-}
-
-func (pw *ProjectWidget) CreatePR() {
-	selectedCount := pw.project.SelectedRepositoryCount()
-	for i := 0; i < pw.project.RepositoryCount(); i++ {
-		r := pw.project.GetRepository(i)
-		if r.Selected || selectedCount == 0 {
-			result, err := internal.CreatePullRequest(r, pw.project)
-			if err != nil {
-				log.Printf("Error creating pull request on %s:  %v", r.Name, err)
-				return
-			}
-			log.Printf("Created pull request on %s: %s", r.Name, result)
-		}
-	}
-}
-
 func (pw *ProjectWidget) Refresh() {
 	pw.list.Refresh()
 	msg := fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount())

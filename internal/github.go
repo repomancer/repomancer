@@ -68,35 +68,6 @@ type GitHubPrResponse struct {
 	NeedsReview []any `json:"needsReview"`
 }
 
-func CommitChangesToSelected(p *Project, commitMessage string) []string {
-	cmd := fmt.Sprintf("git add . && git commit -m \"%s\"", commitMessage)
-	var errors []string
-	doAll := p.SelectedRepositoryCount() == 0
-
-	for i := 0; i < p.RepositoryCount(); i++ {
-		repo := p.GetRepository(i)
-		if doAll || repo.Selected {
-			_, stderr, err := ShellOut(cmd, repo.BaseDir)
-			if err != nil {
-				errors = append(errors, fmt.Sprintf("%s: %s", repo.Title(), stderr))
-			}
-		}
-	}
-	return errors
-}
-
-func PushChanges(r *Repository, project *Project) (string, error) {
-	cmd := fmt.Sprintf("git push origin '%s'", project.Name)
-	stdout, stderr, err := ShellOut(cmd, r.BaseDir)
-	if err != nil {
-		return stderr, fmt.Errorf("%s", stderr)
-	}
-	r.RepositoryStatus.PullRequestCreated = true
-
-	return stdout, nil
-
-}
-
 func CreatePullRequest(r *Repository, project *Project) (string, error) {
 	// gh pr create -f --head tmp3
 	//
