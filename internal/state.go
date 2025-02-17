@@ -3,26 +3,10 @@ package internal
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/driver/desktop"
-	"log"
 )
 
 type State struct {
-	App              fyne.App
-	StartWindow      fyne.Window
-	OpenWindow       fyne.Window
-	NewProjectWindow fyne.Window
-	SettingsWindow   fyne.Window
-	ProjectWindow    fyne.Window
-	Project          *Project
-}
-
-func (state *State) ShowSettingsWindow() {
-	state.SettingsWindow.Show()
-}
-
-func (state *State) ShowProjectWindow() {
-	state.ProjectWindow.Show()
-	state.StartWindow.Hide()
+	App fyne.App
 }
 
 func (state *State) NewHideableWindow(title string) fyne.Window {
@@ -31,7 +15,6 @@ func (state *State) NewHideableWindow(title string) fyne.Window {
 	cmdW := &desktop.CustomShortcut{KeyName: fyne.KeyW, Modifier: fyne.KeyModifierSuper}
 
 	w.Canvas().AddShortcut(cmdW, func(shortcut fyne.Shortcut) {
-		log.Println("We tapped Cmd+W")
 		w.Hide()
 	})
 	return w

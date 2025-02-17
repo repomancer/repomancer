@@ -12,17 +12,17 @@ import (
 	"strings"
 )
 
-type PreferenceScreen struct {
+type SettingsWindow struct {
 	locationLbl   *widgets.LabelWithHelp
 	locationEntry *widgets.ShortcutHandlingEntry
 	okButton      *widget.Button
 	cancelButton  *widget.Button
 }
 
-func NewPreferenceScreen(state *internal.State) fyne.Window {
+func NewSettingsWindow(state *internal.State) fyne.Window {
 	w := state.NewHideableWindow("Settings")
 
-	p := PreferenceScreen{
+	p := SettingsWindow{
 		locationLbl:   widgets.NewLabelWithHelpWidget("Default Location", "Directory where new projects will be created", w),
 		locationEntry: widgets.NewShortcutHandlingEntry(w, false),
 		okButton:      widget.NewButton("Save", nil),

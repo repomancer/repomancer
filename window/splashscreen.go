@@ -64,7 +64,8 @@ func NewStartScreen(state *internal.State) fyne.Window {
 	s.settingsBtn.Disable()
 
 	s.newBtn.OnTapped = func() {
-		//state.ShowNewProjectWindow()
+		window := NewAddProjectScreen(state)
+		window.Show()
 	}
 	s.openBtn.OnTapped = func() {
 		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
@@ -76,7 +77,6 @@ func NewStartScreen(state *internal.State) fyne.Window {
 				return
 			}
 			s.Logf("Open Project: %s", reader.Path())
-			// TODO: Open Project
 			project, err := internal.OpenProject(reader.Path())
 			if err != nil {
 				s.Logf("Failed to open project: %s", err)
@@ -89,8 +89,8 @@ func NewStartScreen(state *internal.State) fyne.Window {
 		}, w)
 	}
 	s.settingsBtn.OnTapped = func() {
-		log.Println("Settings")
-		state.ShowSettingsWindow()
+		settingsWindow := NewSettingsWindow(state)
+		settingsWindow.Show()
 	}
 	s.quitBtn.OnTapped = func() {
 		w.Close()
