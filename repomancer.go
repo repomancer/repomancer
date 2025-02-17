@@ -12,12 +12,10 @@ func main() {
 
 	state := internal.State{}
 	state.App = app.NewWithID("com.sheersky.repomancer")
-	state.StartWindow = screens.NewStartScreen(&state)
-	state.NewProjectWindow = screens.NewAddProjectScreen(&state)
-	state.SettingsWindow = screens.NewPreferenceScreen(&state)
 
 	if len(os.Args) < 2 {
-		state.StartWindow.ShowAndRun()
+		window := screens.NewStartScreen(&state)
+		window.ShowAndRun()
 	} else {
 		project, err := internal.OpenProject(os.Args[1])
 		if err != nil {

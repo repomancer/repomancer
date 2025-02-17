@@ -16,40 +16,40 @@ import (
 
 type AddProjectScreen struct {
 	nameLbl        *widgets.LabelWithHelp
-	nameEntry      *widgets.ShortcutHandlingEntry
+	NameEntry      *widgets.ShortcutHandlingEntry
 	locationLbl    *widgets.LabelWithHelp
-	locationEntry  *widgets.ShortcutHandlingEntry
+	LocationEntry  *widgets.ShortcutHandlingEntry
 	prMessageLbl   *widget.Label
-	prMessageEntry *widgets.ShortcutHandlingEntry
+	PrMessageEntry *widgets.ShortcutHandlingEntry
 	statusMessage  *widget.Label
-	okButton       *widget.Button
-	cancelButton   *widget.Button
+	OkButton       *widget.Button
+	CancelButton   *widget.Button
 }
 
 func (p *AddProjectScreen) Validate() bool {
 	var errors []string
-	_, err := os.Stat(p.locationEntry.Text)
+	_, err := os.Stat(p.LocationEntry.Text)
 	if !os.IsNotExist(err) {
-		errors = append(errors, fmt.Sprintf("%s already exists", p.locationEntry.Text))
+		errors = append(errors, fmt.Sprintf("%s already exists", p.LocationEntry.Text))
 	}
 
-	if p.nameEntry.Text == "" {
+	if p.NameEntry.Text == "" {
 		errors = append(errors, "Name is required")
 	}
-	if p.locationEntry.Text == "" {
+	if p.LocationEntry.Text == "" {
 		errors = append(errors, "Location is required")
 	}
-	if p.prMessageEntry.Text == "" {
+	if p.PrMessageEntry.Text == "" {
 		errors = append(errors, "Pull Request Message is required")
 	}
 
 	if len(errors) == 0 {
-		p.okButton.Enable()
+		p.OkButton.Enable()
 		p.statusMessage.Text = ""
 		p.statusMessage.Refresh()
 		return true
 	} else {
-		p.okButton.Disable()
+		p.OkButton.Disable()
 		p.statusMessage.Text = strings.Join(errors, "\n")
 		p.statusMessage.Refresh()
 		return false
@@ -60,29 +60,29 @@ func NewAddProjectScreen(state *internal.State) fyne.Window {
 	w := state.NewHideableWindow("New Project")
 	p := AddProjectScreen{
 		nameLbl:        widgets.NewLabelWithHelpWidget("Name", "Project Name. Also used for the name of the git branch.\nValid characters: [A-Za-z0-9_-]", w),
-		nameEntry:      widgets.NewShortcutHandlingEntry(w, false),
+		NameEntry:      widgets.NewShortcutHandlingEntry(w, false),
 		locationLbl:    widgets.NewLabelWithHelpWidget("Location", "Where project data and cloned repositories will be stored. Must not exist.", w),
-		locationEntry:  widgets.NewShortcutHandlingEntry(w, false),
+		LocationEntry:  widgets.NewShortcutHandlingEntry(w, false),
 		prMessageLbl:   widget.NewLabel("Pull Request\nMessage"),
-		prMessageEntry: widgets.NewShortcutHandlingEntry(w, false),
+		PrMessageEntry: widgets.NewShortcutHandlingEntry(w, false),
 		statusMessage:  widget.NewLabel(""),
-		okButton:       widget.NewButton("Create", nil),
-		cancelButton:   widget.NewButton("Cancel", nil),
+		OkButton:       widget.NewButton("Create", nil),
+		CancelButton:   widget.NewButton("Cancel", nil),
 	}
-	p.nameEntry.AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ0123456789_-"
-	p.nameEntry.MaxLength = 50
+	p.NameEntry.AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ0123456789_-"
+	p.NameEntry.MaxLength = 50
 	p.statusMessage.Wrapping = fyne.TextWrapWord
-	p.prMessageEntry.Wrapping = fyne.TextWrapWord
-	p.prMessageEntry.MultiLine = true
-	p.okButton.Disable()
+	p.PrMessageEntry.Wrapping = fyne.TextWrapWord
+	p.PrMessageEntry.MultiLine = true
+	p.OkButton.Disable()
 
-	p.nameEntry.OnChanged = func(s string) {
+	p.NameEntry.OnChanged = func(s string) {
 		p.Validate()
 	}
-	p.locationEntry.OnChanged = func(s string) {
+	p.LocationEntry.OnChanged = func(s string) {
 		p.Validate()
 	}
-	p.prMessageEntry.OnChanged = func(s string) {
+	p.PrMessageEntry.OnChanged = func(s string) {
 		p.Validate()
 	}
 
@@ -91,32 +91,34 @@ func NewAddProjectScreen(state *internal.State) fyne.Window {
 		log.Fatal(err)
 	}
 	basePath := fyne.CurrentApp().Preferences().StringWithFallback("baseDirectory", dirname)
-	p.locationEntry.Text = basePath
+	p.LocationEntry.Text = basePath
 
-	p.nameEntry.OnChanged = func(value string) {
-		p.locationEntry.SetText(basePath + strings.Replace(value, "/", "_", -1))
-		p.locationEntry.Refresh()
+	p.NameEntry.OnChanged = func(value string) {
+		p.LocationEntry.SetText(basePath + strings.Replace(value, "/", "_", -1))
+		p.LocationEntry.Refresh()
 	}
 
-	p.okButton.OnTapped = func() {
-		p.statusMessage.Text = p.nameEntry.Text
-		p.okButton.Disable()
-		//project, err := internal.CreateProject(p.nameEntry.Text, p.prMessageEntry.Text, p.locationEntry.Text)
+	p.OkButton.OnTapped = func() {
+		p.statusMessage.Text = p.NameEntry.Text
+		p.OkButton.Disable()
+		project, err := internal.CreateProject(p.NameEntry.Text, p.PrMessageEntry.Text, p.LocationEntry.Text)
 		if err != nil {
 			p.statusMessage.Text = err.Error()
 			p.statusMessage.Refresh()
-			p.okButton.Enable()
+			p.OkButton.Enable()
 		} else {
+			window := NewProjectWindow(state, project)
+			window.Show()
 			//AddProjectScreen(window, project)
 		}
 	}
 
-	p.cancelButton.OnTapped = func() { w.Close() }
+	p.CancelButton.OnTapped = func() { w.Close() }
 
-	grid := container.New(layout.NewFormLayout(), p.nameLbl, p.nameEntry, p.locationLbl, p.locationEntry, p.prMessageLbl, p.prMessageEntry)
+	grid := container.New(layout.NewFormLayout(), p.nameLbl, p.NameEntry, p.locationLbl, p.LocationEntry, p.prMessageLbl, p.PrMessageEntry)
 
 	w.Resize(fyne.NewSize(600, 600))
-	w.SetContent(container.NewVBox(grid, p.statusMessage, p.okButton, p.cancelButton))
-	w.Canvas().Focus(p.nameEntry)
+	w.SetContent(container.NewVBox(grid, p.statusMessage, p.OkButton, p.CancelButton))
+	w.Canvas().Focus(p.NameEntry)
 	return w
 }

@@ -9,7 +9,7 @@ import (
 	"repomancer/window/widgets"
 )
 
-func AddRepositoryDialog(window fyne.Window, project *internal.Project) (*dialog.FormDialog, *widgets.EscapeEntry) {
+func AddRepositoryDialog(window fyne.Window, project *internal.Project, onAdded func()) (*dialog.FormDialog, *widgets.EscapeEntry) {
 	entry := widgets.NewEscapeEntry()
 	entry.SetPlaceHolder("github.com/org/repository")
 	entry.Validator = func(s string) error {
@@ -32,6 +32,7 @@ func AddRepositoryDialog(window fyne.Window, project *internal.Project) (*dialog
 				if err != nil {
 					dialog.NewError(err, window).Show()
 				}
+				onAdded()
 			}
 		},
 		window)
