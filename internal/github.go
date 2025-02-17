@@ -79,6 +79,11 @@ func NewPullRequestJob(r *Repository, project *Project) *Job {
 	return job
 }
 
+func NewPushJob(r *Repository, project *Project) *Job {
+	cmd := fmt.Sprintf("git push origin '%s'", project.Name)
+	return NewInternalJob(r, cmd)
+}
+
 func GetRepositoryInfo(repository string) (RepositoryInfo, error) {
 	cmd := fmt.Sprintf("gh repo view %s --json name,url,pushedAt", repository)
 	var info RepositoryInfo

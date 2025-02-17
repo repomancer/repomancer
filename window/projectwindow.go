@@ -68,15 +68,16 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		w.Canvas().Focus(message)
 	}
 	pw.Toolbar.GitPush.Action = func() {
-		cmd := fmt.Sprintf("git push origin '%s'", project.Name)
-
-		project.AddInternalJobToRepositories(cmd, func(job *internal.Job) {
-			log.Printf("Job complete: %s", job.Duration())
-		})
+		selected := project.SelectedRepositories()
+		for _, repo := range selected {
+			job := internal.NewPushJob(repo, project)
+			repo.AddJob(job)
+		}
 		pw.Refresh()
 		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
+
 		// TODO: Check for pullRequestBody.md in project root, prompt/fail if it doesn't exist
 		selected := project.SelectedRepositories()
 
