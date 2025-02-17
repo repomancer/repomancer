@@ -1,13 +1,18 @@
 package internal
 
 import (
+	"bufio"
+	"fmt"
 	"log"
-	"strings"
+	"os/exec"
 	"time"
 )
 
 // Job represents a shell command run asynchronously in a specific repository's directory
 // The command's stdout, stderr and error are captured.
+// It is expected (but not specifically enforced) that only a single Job will be executing in
+// a repository at one time, and Jobs will always be executed in the order that they were
+// enqueued.
 type Job struct {
 	Repository *Repository
 	Command    string
@@ -40,32 +45,48 @@ func NewInternalJob(repository *Repository, command string) *Job {
 	return job
 }
 
-func (j *Job) BuildLogString() string {
-	var output []string
-	output = append(output, j.Command)
-	if strings.TrimSpace(j.StdOut) != "" {
-		output = append(output, j.StdOut)
-	}
-	if strings.TrimSpace(j.StdErr) != "" {
-		output = append(output, j.StdErr)
-	}
-	return strings.Join(output, "\n")
-}
-
 func (j *Job) Run() {
 	log.Printf("Running command: %s in %s", j.Command, j.Directory)
 	j.StartTime = time.Now()
-	var err error
-	// TODO: Stop storing logs per job, since it's being stored at the repository level???
-	j.StdOut, j.StdErr, err = ShellOut(j.Command, j.Directory)
+	j.Repository.Log(fmt.Sprintf("Command: %s in %s", j.Command, j.Directory))
+
+	cmd := exec.Command(ShellToUse, "-c", j.Command)
+	cmd.Dir = j.Directory
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// TODO: bufio.NewScanner has a maximum single line length of 4kb and a line longer than
+	// that will cause the program to exit with "bufio.Scanner: token too long".
+	// This seems acceptable for now, but could be better. This isn't really intended to dump
+	// huge amounts of logs in to memory.
+	// It's not yet clear what the best behavior would be. Just truncate that line and keep
+	// going? Alternately, write all the output to a log file per repository (bonus: durable
+	// logs between program runs. Disadvantage: more garbage spread over the filesystem, though
+	// that seems relatively minor compared to all the repository cloning. If that was done,
+	// replace the Log viewer with just something that would tail the log file. Seems like it
+	// would still be nice to have some "intelligence" to it, like highlighting commands.
+	scanner := bufio.NewScanner(stdout)
+	err = cmd.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for scanner.Scan() {
+		j.Repository.Log(scanner.Text())
+	}
+	if scanner.Err() != nil {
+		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
+		log.Fatal(scanner.Err())
+	}
+	err = cmd.Wait()
 	if err != nil {
 		j.Error = err
-		// Repository to a function that checks the result of the last job
 		j.Repository.LastCommandResult = err
 	} else {
 		j.Repository.LastCommandResult = nil
 	}
-	j.Repository.Log(j.BuildLogString())
+
 	j.EndTime = time.Now()
 	if j.Error == nil && j.OnComplete != nil {
 		j.OnComplete(j)
