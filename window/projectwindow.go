@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/widget"
 	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
@@ -47,7 +49,23 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 	}
 
 	pw.Toolbar.GitCommit.Action = func() {
-		log.Println("Commit not implemented")
+		message := widget.NewMultiLineEntry()
+		message.Wrapping = fyne.TextWrapWord
+		message.SetPlaceHolder("Title\n\nThis commit...")
+
+		content := []*widget.FormItem{widget.NewFormItem("Commit Message", message)}
+		d := dialog.NewForm("Commit message", "Commit", "Cancel", content, func(b bool) {
+			if b {
+				// TODO: shell escaping problem. Pipe message in to StdIn or write it to a file?
+				cmd := fmt.Sprintf("git add . && git commit -m '%s'", message.Text)
+				project.AddInternalJobToRepositories(cmd, nil)
+				pw.Refresh()
+				pw.ExecuteJobQueue()
+			}
+		}, w)
+		d.Resize(fyne.NewSize(500, 300))
+		d.Show()
+		w.Canvas().Focus(message)
 	}
 	pw.Toolbar.GitPush.Action = func() {
 		cmd := fmt.Sprintf("git push origin '%s'", project.Name)
