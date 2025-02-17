@@ -64,8 +64,18 @@ func NewStartScreen(state *internal.State) fyne.Window {
 	s.settingsBtn.Disable()
 
 	s.newBtn.OnTapped = func() {
-		window := NewAddProjectScreen(state)
-		window.Show()
+		d, focus := NewAddProjectDialog(w, func(name, location string) {
+			project, err := internal.CreateProject(name, "", location)
+			if err != nil {
+				dialog.ShowError(err, w)
+				return
+			}
+			projectWidget := NewProjectWindow(state, project)
+			projectWidget.Show()
+			w.Hide()
+		})
+		d.Show()
+		w.Canvas().Focus(focus)
 	}
 	s.openBtn.OnTapped = func() {
 		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
