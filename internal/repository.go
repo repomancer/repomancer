@@ -18,7 +18,7 @@ type Repository struct {
 	Status            string
 	Selected          bool
 	PullRequest       *PullRequest
-	LastCommandResult error
+	LastCommandResult error `json:"-"`
 	mu                sync.Mutex
 	RepositoryStatus  RepositoryStatus
 	logBinding        binding.StringList
