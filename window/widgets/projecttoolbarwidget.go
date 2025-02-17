@@ -8,32 +8,32 @@ import (
 
 type ProjectToolbarWidget struct {
 	widget.BaseWidget
-	AddRepository           *widget.Button
-	AddMultipleRepositories *widget.Button
-	SelectMenu              *ContextMenuButton
-	SelectAll               *fyne.MenuItem
-	SelectNone              *fyne.MenuItem
-	SelectErrors            *fyne.MenuItem
-	SelectTenMore           *fyne.MenuItem
-	GitMenu                 *ContextMenuButton
-	GitCommit               *fyne.MenuItem
-	GitPush                 *fyne.MenuItem
-	GitOpenPullRequest      *fyne.MenuItem
-	GitRefreshStatus        *fyne.MenuItem
+	AddRepository *widget.Button
+	//AddMultipleRepositories *widget.Button
+	SelectMenu         *ContextMenuButton
+	SelectAll          *fyne.MenuItem
+	SelectNone         *fyne.MenuItem
+	SelectErrors       *fyne.MenuItem
+	SelectTenMore      *fyne.MenuItem
+	GitMenu            *ContextMenuButton
+	GitCommit          *fyne.MenuItem
+	GitPush            *fyne.MenuItem
+	GitOpenPullRequest *fyne.MenuItem
+	GitRefreshStatus   *fyne.MenuItem
 }
 
 func NewProjectToolbarWidget() *ProjectToolbarWidget {
 	item := &ProjectToolbarWidget{
-		AddRepository:           widget.NewButton("Add Repository", nil),
-		AddMultipleRepositories: widget.NewButton("Add Multiple", nil),
-		SelectAll:               fyne.NewMenuItem("Select All", nil),
-		SelectNone:              fyne.NewMenuItem("Select None", nil),
-		SelectErrors:            fyne.NewMenuItem("Select Errors", nil),
-		SelectTenMore:           fyne.NewMenuItem("Select Next 10", nil),
-		GitCommit:               fyne.NewMenuItem("Commit", nil),
-		GitPush:                 fyne.NewMenuItem("Push", nil),
-		GitOpenPullRequest:      fyne.NewMenuItem("Open Pull Request", nil),
-		GitRefreshStatus:        fyne.NewMenuItem("Refresh Status", nil),
+		AddRepository: widget.NewButton("Add Repository", nil),
+		//AddMultipleRepositories: widget.NewButton("Add Multiple", nil),
+		SelectAll:          fyne.NewMenuItem("Select All", nil),
+		SelectNone:         fyne.NewMenuItem("Select None", nil),
+		SelectErrors:       fyne.NewMenuItem("Select Errors", nil),
+		SelectTenMore:      fyne.NewMenuItem("Select Next 10", nil),
+		GitCommit:          fyne.NewMenuItem("Commit", nil),
+		GitPush:            fyne.NewMenuItem("Push", nil),
+		GitOpenPullRequest: fyne.NewMenuItem("Open Pull Request", nil),
+		GitRefreshStatus:   fyne.NewMenuItem("Refresh Status", nil),
 	}
 	item.ExtendBaseWidget(item)
 
@@ -48,6 +48,6 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 }
 
 func (item *ProjectToolbarWidget) CreateRenderer() fyne.WidgetRenderer {
-	c := container.NewHBox(item.AddRepository, item.AddMultipleRepositories, item.SelectMenu, item.GitMenu)
+	c := container.NewHBox(item.AddRepository, item.SelectMenu, item.GitMenu)
 	return widget.NewSimpleRenderer(c)
 }

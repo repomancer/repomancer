@@ -3,7 +3,6 @@ package screens
 import (
 	"fmt"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/dialog"
 	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
@@ -25,9 +24,9 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		d.Show()
 		w.Canvas().Focus(entry)
 	}
-	pw.Toolbar.AddMultipleRepositories.OnTapped = func() {
-		dialog.ShowInformation("Add Multiple", "Multiple", w)
-	}
+	//pw.Toolbar.AddMultipleRepositories.OnTapped = func() {
+	//	dialog.ShowInformation("Add Multiple", "Multiple", w)
+	//}
 	pw.Toolbar.SelectAll.Action = func() {
 		project.Select(internal.All)
 		pw.Refresh()
