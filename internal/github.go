@@ -68,22 +68,15 @@ type GitHubPrResponse struct {
 	NeedsReview []any `json:"needsReview"`
 }
 
-func CreatePullRequest(r *Repository, project *Project) (string, error) {
-	// gh pr create -f --head tmp3
-	//
-	//Creating pull request for tmp3 into main in jashort/test2
-	//
-	//https://github.com/jashort/test2/pull/1
+func NewPullRequestJob(r *Repository, project *Project) *Job {
 	// Todo: Save PR body to a file and use that in the gh pr command
 	cmd := fmt.Sprintf("gh pr create -f --head '%s'", project.Name)
-	stdout, stderr, err := ShellOut(cmd, r.BaseDir)
-	if err != nil {
-		return stderr, fmt.Errorf("%s", stderr)
+	job := NewInternalJob(r, cmd)
+	job.OnComplete = func(job *Job) {
+		job.Repository.RepositoryStatus.PullRequestCreated = true
 	}
-	r.RepositoryStatus.PullRequestCreated = true
 
-	return stdout, nil
-
+	return job
 }
 
 func GetRepositoryInfo(repository string) (RepositoryInfo, error) {
