@@ -136,5 +136,12 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		pw.Refresh()
 	}
 
+	w.SetOnClosed(func() {
+		err := project.SaveProject()
+		if err != nil {
+			log.Printf("Error saving project: %s", err)
+		}
+	})
+
 	return w
 }
