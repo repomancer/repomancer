@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 )
 
 type RepositoryInfo struct {
@@ -67,39 +66,6 @@ type GitHubPrResponse struct {
 		URL               string `json:"url"`
 	} `json:"currentBranch"`
 	NeedsReview []any `json:"needsReview"`
-}
-
-func UpdatePullRequestInfo(r *Repository) error {
-	cmd := "gh pr status --json number,url,state,statusCheckRollup"
-	stdout, stderr, err := ShellOut(cmd, r.BaseDir)
-	if err != nil {
-		log.Printf("Error updating pull request info: %s", stderr)
-		return err
-	}
-
-	var resp GitHubPrResponse
-	err = json.Unmarshal([]byte(stdout), &resp)
-	if err != nil {
-		log.Printf("Error unmarshalling GitHub PR response: %s", err)
-		return err
-	}
-
-	if resp.CurrentBranch.Number == 0 {
-		r.PullRequest = nil
-		return fmt.Errorf("no pull request found")
-	}
-
-	prInfo := PullRequest{
-		Number:      resp.CurrentBranch.Number,
-		Url:         resp.CurrentBranch.URL,
-		Status:      resp.CurrentBranch.State,
-		LastChecked: time.Now(),
-		//StatusCheckRollupState: resp.CurrentBranch.StatusCheckRollup[0].(string),
-	}
-
-	r.PullRequest = &prInfo
-	r.RepositoryStatus.PullRequestCreated = true
-	return nil
 }
 
 func CommitChangesToSelected(p *Project, commitMessage string) []string {

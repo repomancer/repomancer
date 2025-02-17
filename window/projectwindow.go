@@ -72,19 +72,19 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 				return
 			}
 
-			if resp.CurrentBranch.Number == 0 {
+			if resp.CurrentBranch.Number == 0 { // No PR for the current branch
 				job.Repository.PullRequest = nil
-			}
+			} else {
+				prInfo := internal.PullRequest{
+					Number:      resp.CurrentBranch.Number,
+					Url:         resp.CurrentBranch.URL,
+					Status:      resp.CurrentBranch.State,
+					LastChecked: time.Now(),
+				}
 
-			prInfo := internal.PullRequest{
-				Number:      resp.CurrentBranch.Number,
-				Url:         resp.CurrentBranch.URL,
-				Status:      resp.CurrentBranch.State,
-				LastChecked: time.Now(),
+				job.Repository.PullRequest = &prInfo
+				job.Repository.RepositoryStatus.PullRequestCreated = true
 			}
-
-			job.Repository.PullRequest = &prInfo
-			job.Repository.RepositoryStatus.PullRequestCreated = true
 		})
 		pw.Refresh()
 		pw.ExecuteJobQueue()
