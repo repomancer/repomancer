@@ -77,7 +77,15 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
-		log.Println("Open Pull Request not implemented")
+		// TODO: Check for pullRequestBody.md in project root, prompt/fail if it doesn't exist
+		selected := project.SelectedRepositories()
+
+		for _, repo := range selected {
+			job := internal.NewPullRequestJob(repo, project)
+			repo.AddJob(job)
+		}
+		pw.Refresh()
+		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitRefreshStatus.Action = func() {
 		cmd := "gh pr status --json number,url,state,statusCheckRollup"
