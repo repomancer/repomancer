@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const CONFIG_FILE = `
+const ConfigFile = `
 {
   "Name": "Test",
   "Description": "Testing",
@@ -41,7 +41,7 @@ func TestOpenExistingProject(t *testing.T) {
 	defer func(f *os.File) {
 		_ = f.Close()
 	}(f)
-	_, _ = f.Write([]byte(CONFIG_FILE))
+	_, _ = f.Write([]byte(ConfigFile))
 
 	project, err := OpenProject(tmpDir)
 

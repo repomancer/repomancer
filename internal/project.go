@@ -268,8 +268,8 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 				}
 			}(f)
 
-			as_json, _ := json.MarshalIndent(&project, "", "  ")
-			_, err := f.Write(as_json)
+			asJson, _ := json.MarshalIndent(&project, "", "  ")
+			_, err := f.Write(asJson)
 			if err != nil {
 				log.Fatal(err)
 			}
