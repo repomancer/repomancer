@@ -11,6 +11,7 @@ import (
 	"log"
 	"os/exec"
 	"repomancer/internal"
+	"strings"
 )
 
 func ShowLogWindow(repository *internal.Repository) {
@@ -20,11 +21,25 @@ func ShowLogWindow(repository *internal.Repository) {
 	w2.Canvas().AddShortcut(cmdW, func(shortcut fyne.Shortcut) {
 		w2.Hide()
 	})
-	logText := NewShortcutHandlingEntry(w2, false)
-	logText.MultiLine = true
-	logText.Wrapping = fyne.TextWrapWord
 
-	logText.Bind(repository.GetLogBinding())
+	logText := widget.NewListWithData(repository.GetLogBinding(),
+		func() fyne.CanvasObject {
+			w := widget.NewLabel("")
+			return w
+		}, func(item binding.DataItem, object fyne.CanvasObject) {
+			w := object.(*widget.Label)
+			i := item.(binding.String)
+			w.Bind(i)
+
+			val, _ := i.Get()
+			if strings.Contains(val, "Command:") {
+				w.Importance = widget.HighImportance
+			} else {
+				w.Importance = widget.MediumImportance
+			}
+		})
+	logText.HideSeparators = true
+
 	w2.Resize(fyne.NewSize(800, 800))
 	w2.SetContent(logText)
 	w2.Show()
