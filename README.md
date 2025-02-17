@@ -10,5 +10,5 @@ Software repository change management
 
 - Where to put code:
   - Custom widgets hold layout
-  - Windows hold logic that wires things together (sets callbacks, etc)
+  - Windows hold logic that wires things together (sets callbacks, etc.)
   - Project struct holds project state, can be loaded/saved
