@@ -1,12 +1,14 @@
 package screens
 
 import (
+	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
 	"strings"
+	"time"
 )
 
 func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Window {
@@ -60,7 +62,32 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		log.Println("Open Pull Request not implemented")
 	}
 	pw.Toolbar.GitRefreshStatus.Action = func() {
-		log.Println("Refresh Status not implemented")
+		cmd := "gh pr status --json number,url,state,statusCheckRollup"
+		project.AddInternalJobToRepositories(cmd, func(job *internal.Job) {
+
+			var resp internal.GitHubPrResponse
+			err := json.Unmarshal([]byte(strings.Join(job.StdOut, "\n")), &resp)
+			if err != nil {
+				log.Printf("Error unmarshalling GitHub PR response: %s", err)
+				return
+			}
+
+			if resp.CurrentBranch.Number == 0 {
+				job.Repository.PullRequest = nil
+			}
+
+			prInfo := internal.PullRequest{
+				Number:      resp.CurrentBranch.Number,
+				Url:         resp.CurrentBranch.URL,
+				Status:      resp.CurrentBranch.State,
+				LastChecked: time.Now(),
+			}
+
+			job.Repository.PullRequest = &prInfo
+			job.Repository.RepositoryStatus.PullRequestCreated = true
+		})
+		pw.Refresh()
+		pw.ExecuteJobQueue()
 	}
 
 	pw.CommandInput.OnSubmitted = func(s string) {
