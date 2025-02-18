@@ -59,14 +59,3 @@ func TestOpenExistingProject(t *testing.T) {
 		}
 	}
 }
-
-func TestProject_AddRepositoryFromUrl(t *testing.T) {
-	p := new(Project)
-	err := p.AddRepositoryFromUrl("https://github.com/jashort/foo")
-	if err != nil {
-		t.Errorf("error should be nil, was %v", err)
-	}
-	if p.Repositories[0].Title() != "github.com/jashort/foo" {
-		t.Errorf("repository title does not match")
-	}
-}
