@@ -129,15 +129,17 @@ func (p *Project) AddRepository(host, org, name string) error {
 	if err != nil {
 		return err
 	}
-	p.mu.Lock()
-	p.Repositories = append(p.Repositories, r)
-	p.mu.Unlock()
 	_, err = Clone(r)
 	if err != nil {
+		// If there was an error cloning, remove the directory that was created
+		_ = os.RemoveAll(r.BaseDir)
 		return err
 	}
 	_, err = CheckoutBranch(r, p.Name)
 
+	p.mu.Lock()
+	p.Repositories = append(p.Repositories, r)
+	p.mu.Unlock()
 	log.Printf("Cloned repository %s to %s", r.Name, r.BaseDir)
 
 	err = p.SaveProject()

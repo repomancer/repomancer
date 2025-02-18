@@ -28,9 +28,14 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		d.Show()
 		w.Canvas().Focus(entry)
 	}
-	//pw.Toolbar.AddMultipleRepositories.OnTapped = func() {
-	//	dialog.ShowInformation("Add Multiple", "Multiple", w)
-	//}
+	pw.Toolbar.AddMultipleRepositories.OnTapped = func() {
+		d, entry := AddMultipleRepositoryDialog(w, project, func() {
+			pw.Refresh()
+		})
+
+		d.Show()
+		w.Canvas().Focus(entry)
+	}
 	pw.Toolbar.SelectAll.Action = func() {
 		project.Select(internal.All)
 		pw.Refresh()

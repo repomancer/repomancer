@@ -18,6 +18,7 @@ func (m *EscapeEntry) TypedKey(event *fyne.KeyEvent) {
 	if event.Name == fyne.KeyEnter || event.Name == fyne.KeyReturn && m.OnSubmitted != nil {
 		m.OnSubmitted(m.Text)
 	}
+	m.Entry.TypedKey(event)
 }
 
 func (m *EscapeEntry) TypedRune(r rune) {
