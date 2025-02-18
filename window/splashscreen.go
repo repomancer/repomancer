@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
 	"log"
@@ -78,25 +79,44 @@ func NewStartScreen(state *internal.State) fyne.Window {
 		w.Canvas().Focus(focus)
 	}
 	s.openBtn.OnTapped = func() {
-		dialog.ShowFolderOpen(func(reader fyne.ListableURI, err error) {
+		d := dialog.NewFolderOpen(func(reader fyne.ListableURI, err error) {
 			if err != nil {
-				s.Logf("%v", err)
+				dialog.ShowError(err, w)
 			}
 			if reader == nil {
 				// Nothing was chosen
 				return
 			}
-			s.Logf("Open Project: %s", reader.Path())
 			project, err := internal.OpenProject(reader.Path())
 			if err != nil {
-				s.Logf("Failed to open project: %s", err)
+				dialog.ShowError(err, w)
 			} else {
 				window := NewProjectWindow(state, project)
 				window.Show()
 				w.Hide()
-
 			}
 		}, w)
+
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		existing := fyne.CurrentApp().Preferences().StringWithFallback("baseDirectory", dirname)
+		testData := storage.NewFileURI(existing)
+		var dir fyne.ListableURI
+		dir, err = storage.ListerForURI(testData)
+		if err != nil {
+			log.Printf("Failed to open directory: %s", err)
+			testData = storage.NewFileURI(dirname)
+			dir, err = storage.ListerForURI(testData)
+			if err != nil {
+				dialog.ShowError(err, w)
+			}
+		}
+		d.SetLocation(dir)
+		d.SetFileName("config.json")
+		d.Show()
 	}
 	s.settingsBtn.OnTapped = func() {
 		settingsWindow := NewSettingsWindow(state)
@@ -125,6 +145,6 @@ func NewStartScreen(state *internal.State) fyne.Window {
 
 	screen := container.NewBorder(top, nil, nil, nil, content)
 	w.SetContent(screen)
-	w.Resize(fyne.NewSize(500, 600))
+	w.Resize(fyne.NewSize(600, 600))
 	return w
 }
