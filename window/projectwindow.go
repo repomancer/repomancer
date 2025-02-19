@@ -65,7 +65,6 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 				cmd := fmt.Sprintf("git add . && git commit -m '%s'", message.Text)
 				// TODO: Create something similar to NewPushJob
 				project.AddInternalJobToRepositories(cmd, nil)
-				pw.Refresh()
 				pw.ExecuteJobQueue()
 			}
 		}, w)
@@ -79,7 +78,6 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 			job := internal.NewPushJob(repo, project)
 			repo.AddJob(job)
 		}
-		pw.Refresh()
 		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
@@ -130,7 +128,6 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		pw.CommandInput.Refresh()
 		project.AddJobToRepositories(cmd)
 		pw.ExecuteJobQueue()
-		pw.Refresh()
 	}
 	pw.RunBtn.OnTapped = func() {
 		cmd := strings.TrimSpace(pw.CommandInput.Text)
@@ -139,7 +136,6 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		pw.CommandInput.Refresh()
 		project.AddJobToRepositories(cmd)
 		pw.ExecuteJobQueue()
-		pw.Refresh()
 	}
 
 	w.SetOnClosed(func() {

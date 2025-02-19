@@ -71,8 +71,9 @@ func (pw *ProjectWidget) ExecuteJobQueue() {
 		}
 	}
 	log.Printf("Found %d jobs to run", len(jobsToRun))
-
+	pw.Refresh()
 	go func() {
+		// TODO: Swap this out for a stack, since jobs may add other jobs
 		for i := 0; i < len(jobsToRun); i++ {
 			pw.statusLabel.SetText(fmt.Sprintf("Running %d/%d", i+1, len(jobsToRun)))
 			jobsToRun[i].Run()
