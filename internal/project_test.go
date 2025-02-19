@@ -9,7 +9,7 @@ import (
 const ConfigFile = `
 {
   "Name": "Test",
-  "Description": "Testing",
+  "PullRequestDescription": "Testing",
   "Repositories": [
     {"Name": "github.com/jashort/foo"},
     {"Name": "github.com/jashort/bar"}
@@ -54,7 +54,7 @@ func TestOpenExistingProject(t *testing.T) {
 		if project.Name != "Test" {
 			t.Errorf("project name does not match")
 		}
-		if project.Description != "Testing" {
+		if project.PullRequestDescription != "Testing" {
 			t.Errorf("project description does not match")
 		}
 	}

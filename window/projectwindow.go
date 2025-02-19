@@ -1,16 +1,16 @@
 package screens
 
 import (
-	"encoding/json"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"log"
+	"os"
+	"path"
 	"repomancer/internal"
 	"repomancer/window/widgets"
 	"strings"
-	"time"
 )
 
 func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Window {
@@ -63,6 +63,7 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 			if b {
 				// TODO: shell escaping problem. Pipe message in to StdIn or write it to a file?
 				cmd := fmt.Sprintf("git add . && git commit -m '%s'", message.Text)
+				// TODO: Create something similar to NewPushJob
 				project.AddInternalJobToRepositories(cmd, nil)
 				pw.Refresh()
 				pw.ExecuteJobQueue()
@@ -82,43 +83,43 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
+		d, entry := PullRequestDialog(w, project, func(title, description string) {
+			project.PullRequestTitle = title
+			project.PullRequestDescription = description
+			err := project.SaveProject()
+			if err != nil {
+				log.Println(err)
+			}
+			err = os.WriteFile(path.Join(project.ProjectDir, "PullRequest.md"), []byte(project.PullRequestDescription), 0644)
+			if err != nil {
+				log.Println(err)
+				dialog.NewError(err, w).Show()
+				return
+			}
+			selected := project.SelectedRepositories()
 
-		// TODO: Check for pullRequestBody.md in project root, prompt/fail if it doesn't exist
+			for _, repo := range selected {
+				job := internal.NewPullRequestJob(repo, project)
+				job.OnComplete = func(job *internal.Job) {
+					// TODO: there's probably an edge case where something doesn't run here
+					// Need to switch to a single job queue/runner
+					refreshJob := internal.NewPRStatusJob(repo)
+					repo.AddJob(refreshJob)
+				}
+				repo.AddJob(job)
+			}
+			pw.ExecuteJobQueue()
+		})
+		d.Show()
+		w.Canvas().Focus(entry)
+	}
+	pw.Toolbar.GitRefreshStatus.Action = func() {
 		selected := project.SelectedRepositories()
 
 		for _, repo := range selected {
-			job := internal.NewPullRequestJob(repo, project)
+			job := internal.NewPRStatusJob(repo)
 			repo.AddJob(job)
 		}
-		pw.Refresh()
-		pw.ExecuteJobQueue()
-	}
-	pw.Toolbar.GitRefreshStatus.Action = func() {
-		cmd := "gh pr status --json number,url,state,statusCheckRollup"
-		project.AddInternalJobToRepositories(cmd, func(job *internal.Job) {
-
-			var resp internal.GitHubPrResponse
-			err := json.Unmarshal([]byte(strings.Join(job.StdOut, "\n")), &resp)
-			if err != nil {
-				log.Printf("Error unmarshalling GitHub PR response: %s", err)
-				return
-			}
-
-			if resp.CurrentBranch.Number == 0 { // No PR for the current branch
-				job.Repository.PullRequest = nil
-			} else {
-				prInfo := internal.PullRequest{
-					Number:      resp.CurrentBranch.Number,
-					Url:         resp.CurrentBranch.URL,
-					Status:      resp.CurrentBranch.State,
-					LastChecked: time.Now(),
-				}
-
-				job.Repository.PullRequest = &prInfo
-				job.Repository.RepositoryStatus.PullRequestCreated = true
-			}
-		})
-		pw.Refresh()
 		pw.ExecuteJobQueue()
 	}
 
