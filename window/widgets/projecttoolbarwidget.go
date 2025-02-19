@@ -30,10 +30,13 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 		SelectNone:              fyne.NewMenuItem("Select None", nil),
 		SelectErrors:            fyne.NewMenuItem("Select Errors", nil),
 		SelectTenMore:           fyne.NewMenuItem("Select Next 10", nil),
-		GitCommit:               fyne.NewMenuItem("Commit", nil),
-		GitPush:                 fyne.NewMenuItem("Push", nil),
-		GitOpenPullRequest:      fyne.NewMenuItem("Open Pull Request", nil),
-		GitRefreshStatus:        fyne.NewMenuItem("Refresh Status", nil),
+		// TODO: Add more variants. Select Everything with unmerged PRs?
+		// Select Merged PRs?
+		// Etc
+		GitCommit:          fyne.NewMenuItem("Commit", nil),
+		GitPush:            fyne.NewMenuItem("Push", nil),
+		GitOpenPullRequest: fyne.NewMenuItem("Open Pull Request", nil),
+		GitRefreshStatus:   fyne.NewMenuItem("Refresh Status", nil),
 	}
 	item.ExtendBaseWidget(item)
 
