@@ -21,6 +21,15 @@ const (
 	TenMore
 )
 
+type Project struct {
+	mu                     sync.Mutex
+	Name                   string
+	PullRequestTitle       string
+	PullRequestDescription string
+	Repositories           []*Repository
+	ProjectDir             string `json:"-"` // Calculated on load, not saved with configuration
+}
+
 func (p *Project) Select(selectRange SelectRange) {
 	cnt := 0
 	if selectRange == All {
@@ -97,14 +106,6 @@ func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *
 		j.OnComplete = onComplete
 		selected[i].AddJob(j)
 	}
-}
-
-type Project struct {
-	mu           sync.Mutex
-	Name         string
-	Description  string
-	Repositories []*Repository
-	ProjectDir   string `json:"-"` // Calculated on load, not saved with configuration
 }
 
 func (p *Project) AddRepository(host, org, name string) error {
@@ -263,9 +264,9 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 	} else {
 		if os.IsNotExist(err) {
 			project := Project{
-				Name:        name,
-				Description: description,
-				ProjectDir:  projectPath,
+				Name:                   name,
+				PullRequestDescription: description,
+				ProjectDir:             projectPath,
 			}
 
 			f, _ := os.Create(filepath.Join(projectPath, "config.json"))

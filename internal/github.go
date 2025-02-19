@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path"
 	"strings"
+	"time"
 )
 
 type RepositoryInfo struct {
@@ -12,6 +14,8 @@ type RepositoryInfo struct {
 	URL      string `json:"url"`
 	PushedAt string `json:"pushedAt"`
 }
+
+const PullRequestFilename = "PullRequest.md"
 
 // NormalizeGitUrl tries to take any input URL and turn it to
 // github-host.com/org/repo
@@ -69,8 +73,8 @@ type GitHubPrResponse struct {
 }
 
 func NewPullRequestJob(r *Repository, project *Project) *Job {
-	// Todo: Save PR body to a file and use that in the gh pr command
-	cmd := fmt.Sprintf("gh pr create -f --head '%s'", project.Name)
+	prMessage := path.Join(project.ProjectDir, PullRequestFilename)
+	cmd := fmt.Sprintf("gh pr create --title '%s' --body-file '%s' --head '%s'", project.PullRequestTitle, prMessage, project.Name)
 	job := NewInternalJob(r, cmd)
 	job.OnComplete = func(job *Job) {
 		job.Repository.RepositoryStatus.PullRequestCreated = true
@@ -82,6 +86,34 @@ func NewPullRequestJob(r *Repository, project *Project) *Job {
 func NewPushJob(r *Repository, project *Project) *Job {
 	cmd := fmt.Sprintf("git push origin '%s'", project.Name)
 	return NewInternalJob(r, cmd)
+}
+
+func NewPRStatusJob(r *Repository) *Job {
+	cmd := "gh pr status --json number,url,state,statusCheckRollup"
+	j := NewInternalJob(r, cmd)
+	j.OnComplete = func(job *Job) {
+		var resp GitHubPrResponse
+		err := json.Unmarshal([]byte(strings.Join(job.StdOut, "\n")), &resp)
+		if err != nil {
+			log.Printf("Error unmarshalling GitHub PR response: %s", err)
+			return
+		}
+
+		if resp.CurrentBranch.Number == 0 { // No PR for the current branch
+			job.Repository.PullRequest = nil
+		} else {
+			prInfo := PullRequest{
+				Number:      resp.CurrentBranch.Number,
+				Url:         resp.CurrentBranch.URL,
+				Status:      resp.CurrentBranch.State,
+				LastChecked: time.Now(),
+			}
+
+			job.Repository.PullRequest = &prInfo
+			job.Repository.RepositoryStatus.PullRequestCreated = true
+		}
+	}
+	return j
 }
 
 func GetRepositoryInfo(repository string) (RepositoryInfo, error) {
