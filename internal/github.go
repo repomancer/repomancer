@@ -24,6 +24,7 @@ const PullRequestFilename = "PullRequest.md"
 func NormalizeGitUrl(url string) (string, error) {
 	u := strings.TrimSpace(url)
 	u = strings.TrimPrefix(u, "ssh://")
+	u = strings.TrimPrefix(u, "git@")
 	u = strings.TrimPrefix(u, "https://")
 	u = strings.TrimPrefix(u, "http://")
 	u = strings.TrimPrefix(u, "git://")
