@@ -105,7 +105,7 @@ func NewProjectWidget() *ProjectWidget {
 		RunBtn:       widget.NewButton("Run", nil),
 		Toolbar:      NewProjectToolbarWidget(),
 	}
-
+	pw.ExtendBaseWidget(pw)
 	pw.list = widget.NewList(
 		func() int { return pw.project.RepositoryCount() },
 		func() fyne.CanvasObject {
