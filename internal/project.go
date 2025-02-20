@@ -19,6 +19,8 @@ const (
 	None
 	Errors
 	TenMore
+	ReposWithPullRequest
+	ReposWithoutPullRequest
 )
 
 type Project struct {
@@ -31,36 +33,54 @@ type Project struct {
 }
 
 func (p *Project) Select(selectRange SelectRange) {
-	cnt := 0
-	if selectRange == All {
+	switch selectRange {
+	case All:
 		for i := 0; i < p.RepositoryCount(); i++ {
 			p.GetRepository(i).Selected = true
-			cnt++
 		}
-	} else if selectRange == None {
+	case None:
 		for i := 0; i < p.RepositoryCount(); i++ {
 			p.GetRepository(i).Selected = false
 		}
-	} else if selectRange == Errors {
+	case Errors:
 		for i := 0; i < p.RepositoryCount(); i++ {
 			if p.GetRepository(i).LastCommandResult != nil {
 				p.GetRepository(i).Selected = true
-				cnt++
 			} else {
 				p.GetRepository(i).Selected = false
 			}
 		}
-	} else if selectRange == TenMore {
+	case TenMore:
 		added := 0
 		for i := 0; i < p.RepositoryCount(); i++ {
 			if !p.GetRepository(i).Selected {
 				if added < 10 {
 					p.GetRepository(i).Selected = true
 					added++
-					cnt++
+
 				}
 			}
 		}
+	case ReposWithPullRequest:
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if p.GetRepository(i).PullRequest != nil {
+				p.GetRepository(i).Selected = true
+			} else {
+				p.GetRepository(i).Selected = false
+			}
+		}
+
+	case ReposWithoutPullRequest:
+		for i := 0; i < p.RepositoryCount(); i++ {
+			if p.GetRepository(i).PullRequest == nil {
+				p.GetRepository(i).Selected = true
+			} else {
+				p.GetRepository(i).Selected = false
+			}
+		}
+
+	default:
+		panic("unhandled default case")
 	}
 }
 
