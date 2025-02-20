@@ -11,7 +11,9 @@ func TestNormalizeGitUrl(t *testing.T) {
 		{"a", "", true},
 		{"github.com/jashort/clexpg", "github.com/jashort/clexpg", false},
 		{"github.com/jashort/", "", true},
-		{"other.git-server.com/org/repo", "other.git-server.com/org/repo", false}, // More examples:
+		{"other.git-server.com/org/repo", "other.git-server.com/org/repo", false},
+		{" github.com/jashort/clexpg ", "github.com/jashort/clexpg", false}, // With spaces
+		// More examples:
 		//{"ssh://git@example.com:1234/path/to/repo.git/", false}, // Not sure how to handle ports in all this
 		//{"ssh://git@example.com/path/to/repo.git/", false},
 		//{"ssh://host.xz:port/path/to/repo.git/", false},
