@@ -8,31 +8,35 @@ import (
 
 type ProjectToolbarWidget struct {
 	widget.BaseWidget
-	AddRepository           *widget.Button
-	AddMultipleRepositories *widget.Button
-	SelectMenu              *ContextMenuButton
-	SelectAll               *fyne.MenuItem
-	SelectNone              *fyne.MenuItem
-	SelectErrors            *fyne.MenuItem
-	SelectTenMore           *fyne.MenuItem
-	GitMenu                 *ContextMenuButton
-	GitCommit               *fyne.MenuItem
-	GitPush                 *fyne.MenuItem
-	GitOpenPullRequest      *fyne.MenuItem
-	GitRefreshStatus        *fyne.MenuItem
-	CopyMenu                *ContextMenuButton
-	CopyRepositoryList      *fyne.MenuItem
-	CopyRepositoryStatus    *fyne.MenuItem
+	AddRepository            *widget.Button
+	AddMultipleRepositories  *widget.Button
+	SelectMenu               *ContextMenuButton
+	SelectAll                *fyne.MenuItem
+	SelectNone               *fyne.MenuItem
+	SelectErrors             *fyne.MenuItem
+	SelectTenMore            *fyne.MenuItem
+	SelectWithPullRequest    *fyne.MenuItem
+	SelectWithoutPullRequest *fyne.MenuItem
+	GitMenu                  *ContextMenuButton
+	GitCommit                *fyne.MenuItem
+	GitPush                  *fyne.MenuItem
+	GitOpenPullRequest       *fyne.MenuItem
+	GitRefreshStatus         *fyne.MenuItem
+	CopyMenu                 *ContextMenuButton
+	CopyRepositoryList       *fyne.MenuItem
+	CopyRepositoryStatus     *fyne.MenuItem
 }
 
 func NewProjectToolbarWidget() *ProjectToolbarWidget {
 	item := &ProjectToolbarWidget{
-		AddRepository:           widget.NewButton("Add Repository", nil),
-		AddMultipleRepositories: widget.NewButton("Add Multiple", nil),
-		SelectAll:               fyne.NewMenuItem("Select All", nil),
-		SelectNone:              fyne.NewMenuItem("Select None", nil),
-		SelectErrors:            fyne.NewMenuItem("Select Errors", nil),
-		SelectTenMore:           fyne.NewMenuItem("Select Next 10", nil),
+		AddRepository:            widget.NewButton("Add Repository", nil),
+		AddMultipleRepositories:  widget.NewButton("Add Multiple", nil),
+		SelectAll:                fyne.NewMenuItem("All", nil),
+		SelectNone:               fyne.NewMenuItem("None", nil),
+		SelectErrors:             fyne.NewMenuItem("Errors", nil),
+		SelectTenMore:            fyne.NewMenuItem("Next 10", nil),
+		SelectWithPullRequest:    fyne.NewMenuItem("Repos With PullRequest", nil),
+		SelectWithoutPullRequest: fyne.NewMenuItem("Repos Without Pull Request", nil),
 		// TODO: Add more variants. Select Everything with unmerged PRs?
 		// Select Merged PRs?
 		// Etc
@@ -47,7 +51,7 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 
 	item.SelectMenu = NewContextMenuButton("Select...",
 		fyne.NewMenu("Select",
-			item.SelectAll, item.SelectNone, item.SelectErrors, item.SelectTenMore))
+			item.SelectAll, item.SelectNone, item.SelectErrors, item.SelectTenMore, item.SelectWithPullRequest, item.SelectWithoutPullRequest))
 
 	item.GitMenu = NewContextMenuButton("GitHub...",
 		fyne.NewMenu("GitHub",

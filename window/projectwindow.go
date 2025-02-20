@@ -52,7 +52,14 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		project.Select(internal.TenMore)
 		pw.Refresh()
 	}
-
+	pw.Toolbar.SelectWithPullRequest.Action = func() {
+		project.Select(internal.ReposWithPullRequest)
+		pw.Refresh()
+	}
+	pw.Toolbar.SelectWithoutPullRequest.Action = func() {
+		project.Select(internal.ReposWithoutPullRequest)
+		pw.Refresh()
+	}
 	pw.Toolbar.GitCommit.Action = func() {
 		message := widget.NewMultiLineEntry()
 		message.Wrapping = fyne.TextWrapWord
