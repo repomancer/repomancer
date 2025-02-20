@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2/data/binding"
 	"log"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -34,6 +35,11 @@ func (r *Repository) GetLogBinding() binding.StringList {
 		}
 	}
 	return r.logBinding
+}
+
+func (r *Repository) GetUrl() *url.URL {
+	repoUrl, _ := url.Parse(fmt.Sprintf("https://%s/%s/%s", r.Host, r.Organization, r.Name))
+	return repoUrl
 }
 
 func (r *Repository) Log(message string) {

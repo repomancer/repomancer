@@ -14,7 +14,7 @@ import (
 
 type RepositoryWidget struct {
 	widget.BaseWidget
-	Name              *widget.Label
+	Name              *widget.Hyperlink
 	Status            *widget.Label
 	LastCommandResult *widget.Label
 	Selected          *ToggleIconWidget
@@ -27,7 +27,7 @@ type RepositoryWidget struct {
 
 func NewRepositoryWidget(title, comment string) *RepositoryWidget {
 	item := &RepositoryWidget{
-		Name:              widget.NewLabel(title),
+		Name:              widget.NewHyperlink(title, nil),
 		Status:            widget.NewLabel(comment),
 		LastCommandResult: widget.NewLabel(""),
 		CommandsCount:     widget.NewLabel("0"),
@@ -57,6 +57,7 @@ func (rw *RepositoryWidget) CreateRenderer() fyne.WidgetRenderer {
 
 func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 	rw.Name.SetText(repo.Title())
+	rw.Name.URL = repo.GetUrl()
 	rw.Status.Bind(binding.BindString(&repo.Status))
 	if repo.LastCommandResult != nil {
 		rw.LastCommandResult.SetText(fmt.Sprintf("%s", repo.LastCommandResult))
