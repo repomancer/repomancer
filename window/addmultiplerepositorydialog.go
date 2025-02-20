@@ -14,6 +14,7 @@ import (
 func AddMultipleRepositoryDialog(window fyne.Window, project *internal.Project, onAdded func()) (*dialog.FormDialog, *widgets.EscapeEntry) {
 	entry := widgets.NewEscapeEntry()
 	entry.MultiLine = true
+	entry.SetMinRowsVisible(15)
 	entry.SetPlaceHolder("github.com/org/repository\ngithub.com/org/repository2")
 	entry.Validator = func(s string) error {
 		var errors []string
