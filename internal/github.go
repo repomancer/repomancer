@@ -22,7 +22,8 @@ const PullRequestFilename = "PullRequest.md"
 // There are a lot of corner cases that don't work here, it is not an exhaustive list
 // For example, it doesn't try to clean out invalid characters
 func NormalizeGitUrl(url string) (string, error) {
-	u := strings.TrimPrefix(url, "ssh://")
+	u := strings.TrimSpace(url)
+	u = strings.TrimPrefix(u, "ssh://")
 	u = strings.TrimPrefix(u, "https://")
 	u = strings.TrimPrefix(u, "http://")
 	u = strings.TrimPrefix(u, "git://")
