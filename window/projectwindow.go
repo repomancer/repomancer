@@ -120,6 +120,26 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		}
 		pw.ExecuteJobQueue()
 	}
+	pw.Toolbar.CopyRepositoryList.Action = func() {
+		var repos []string
+		for _, repo := range project.SelectedRepositories() {
+			repos = append(repos, repo.GetUrl().String())
+		}
+		w.Clipboard().SetContent(strings.Join(repos, "\n"))
+	}
+
+	pw.Toolbar.CopyRepositoryStatus.Action = func() {
+		var repos []string
+		for _, repo := range project.SelectedRepositories() {
+			status := ""
+			if repo.PullRequest != nil {
+				status = repo.PullRequest.Status
+			}
+			line := strings.Join([]string{repo.GetUrl().String(), status}, ",")
+			repos = append(repos, line)
+		}
+		w.Clipboard().SetContent(strings.Join(repos, "\n"))
+	}
 
 	pw.CommandInput.OnSubmitted = func(s string) {
 		cmd := strings.TrimSpace(pw.CommandInput.Text)

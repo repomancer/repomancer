@@ -20,6 +20,9 @@ type ProjectToolbarWidget struct {
 	GitPush                 *fyne.MenuItem
 	GitOpenPullRequest      *fyne.MenuItem
 	GitRefreshStatus        *fyne.MenuItem
+	CopyMenu                *ContextMenuButton
+	CopyRepositoryList      *fyne.MenuItem
+	CopyRepositoryStatus    *fyne.MenuItem
 }
 
 func NewProjectToolbarWidget() *ProjectToolbarWidget {
@@ -33,10 +36,12 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 		// TODO: Add more variants. Select Everything with unmerged PRs?
 		// Select Merged PRs?
 		// Etc
-		GitCommit:          fyne.NewMenuItem("Commit", nil),
-		GitPush:            fyne.NewMenuItem("Push", nil),
-		GitOpenPullRequest: fyne.NewMenuItem("Open Pull Request", nil),
-		GitRefreshStatus:   fyne.NewMenuItem("Refresh Status", nil),
+		GitCommit:            fyne.NewMenuItem("Commit", nil),
+		GitPush:              fyne.NewMenuItem("Push", nil),
+		GitOpenPullRequest:   fyne.NewMenuItem("Open Pull Request", nil),
+		GitRefreshStatus:     fyne.NewMenuItem("Refresh Status", nil),
+		CopyRepositoryList:   fyne.NewMenuItem("Repository List", nil),
+		CopyRepositoryStatus: fyne.NewMenuItem("Pull Request Status", nil),
 	}
 	item.ExtendBaseWidget(item)
 
@@ -44,13 +49,16 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 		fyne.NewMenu("Select",
 			item.SelectAll, item.SelectNone, item.SelectErrors, item.SelectTenMore))
 
-	item.GitMenu = NewContextMenuButton("GitHub...", fyne.NewMenu("GitHub",
-		item.GitCommit, item.GitPush, item.GitOpenPullRequest, item.GitRefreshStatus))
+	item.GitMenu = NewContextMenuButton("GitHub...",
+		fyne.NewMenu("GitHub",
+			item.GitCommit, item.GitPush, item.GitOpenPullRequest, item.GitRefreshStatus))
 
+	item.CopyMenu = NewContextMenuButton("Copy...",
+		fyne.NewMenu("Copy", item.CopyRepositoryList, item.CopyRepositoryStatus))
 	return item
 }
 
 func (item *ProjectToolbarWidget) CreateRenderer() fyne.WidgetRenderer {
-	c := container.NewHBox(item.AddRepository, item.AddMultipleRepositories, item.SelectMenu, item.GitMenu)
+	c := container.NewHBox(item.AddRepository, item.AddMultipleRepositories, item.SelectMenu, item.GitMenu, item.CopyMenu)
 	return widget.NewSimpleRenderer(c)
 }
