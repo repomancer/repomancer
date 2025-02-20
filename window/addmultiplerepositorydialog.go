@@ -46,6 +46,7 @@ func AddMultipleRepositoryDialog(window fyne.Window, project *internal.Project, 
 						if err != nil {
 							errors = append(errors, err)
 						}
+						onAdded()
 					}
 				}
 
