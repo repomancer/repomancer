@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
 )
@@ -38,11 +37,9 @@ func AddRepositoryDialog(window fyne.Window, project *internal.Project, onAdded 
 		window)
 
 	entry.OnEscape = func() {
-		log.Println("Escape")
 		d.Hide()
 	}
 	entry.OnSubmitted = func(s string) {
-		log.Println("Submit")
 		d.Submit()
 	}
 
