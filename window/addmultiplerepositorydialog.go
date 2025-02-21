@@ -5,7 +5,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
 	"strings"
@@ -66,7 +65,6 @@ func AddMultipleRepositoryDialog(window fyne.Window, project *internal.Project, 
 		window)
 
 	entry.OnEscape = func() {
-		log.Println("Escape")
 		d.Hide()
 	}
 	entry.OnSubmitted = func(s string) {
