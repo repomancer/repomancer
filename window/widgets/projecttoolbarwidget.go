@@ -27,6 +27,8 @@ type ProjectToolbarWidget struct {
 	CopyMenu                 *ContextMenuButton
 	CopyRepositoryList       *fyne.MenuItem
 	CopyRepositoryStatus     *fyne.MenuItem
+	StatisticsMenu           *ContextMenuButton
+	ProjectStatistics        *fyne.MenuItem
 }
 
 func NewProjectToolbarWidget() *ProjectToolbarWidget {
@@ -49,6 +51,7 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 		GitRefreshStatus:     fyne.NewMenuItem("Refresh Status", nil),
 		CopyRepositoryList:   fyne.NewMenuItem("Repository List", nil),
 		CopyRepositoryStatus: fyne.NewMenuItem("Pull Request Status", nil),
+		ProjectStatistics:    fyne.NewMenuItem("Project Statistics", nil),
 	}
 	item.ExtendBaseWidget(item)
 	item.RepositoryMenu = NewContextMenuButton("Repository...", fyne.NewMenu("Repository",
@@ -64,10 +67,13 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 
 	item.CopyMenu = NewContextMenuButton("Copy...",
 		fyne.NewMenu("Copy", item.CopyRepositoryList, item.CopyRepositoryStatus))
+
+	item.StatisticsMenu = NewContextMenuButton("Statistics...",
+		fyne.NewMenu("Project Statistics", item.ProjectStatistics))
 	return item
 }
 
 func (item *ProjectToolbarWidget) CreateRenderer() fyne.WidgetRenderer {
-	c := container.NewHBox(item.RepositoryMenu, item.SelectMenu, item.GitMenu, item.CopyMenu)
+	c := container.NewHBox(item.RepositoryMenu, item.SelectMenu, item.GitMenu, item.CopyMenu, item.StatisticsMenu)
 	return widget.NewSimpleRenderer(c)
 }
