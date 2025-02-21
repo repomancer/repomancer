@@ -56,8 +56,14 @@ type ProjectWidget struct {
 
 func (pw *ProjectWidget) Refresh() {
 	pw.list.Refresh()
-	msg := fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount())
+	selectedCount := pw.project.SelectedRepositoryCount()
+	msg := fmt.Sprintf("%d/%d Selected", selectedCount, pw.project.RepositoryCount())
 	pw.statusLabel.SetText(msg)
+	if selectedCount > 0 {
+		pw.Toolbar.DeleteRepository.Disabled = false
+	} else {
+		pw.Toolbar.DeleteRepository.Disabled = true
+	}
 }
 
 func (pw *ProjectWidget) ExecuteJobQueue() {
@@ -124,7 +130,14 @@ func NewProjectWidget() *ProjectWidget {
 					rw.Selected.SetIcon(theme.CheckButtonIcon())
 				}
 				rw.Selected.Refresh()
-				pw.statusLabel.SetText(fmt.Sprintf("%d/%d Selected", pw.project.SelectedRepositoryCount(), pw.project.RepositoryCount()))
+				selectedCount := pw.project.SelectedRepositoryCount()
+				msg := fmt.Sprintf("%d/%d Selected", selectedCount, pw.project.RepositoryCount())
+				pw.statusLabel.SetText(msg)
+				if selectedCount > 0 {
+					pw.Toolbar.DeleteRepository.Disabled = false
+				} else {
+					pw.Toolbar.DeleteRepository.Disabled = true
+				}
 			}
 
 		},
