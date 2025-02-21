@@ -129,6 +129,7 @@ func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *
 }
 
 func (p *Project) AddRepository(host, org, name string) error {
+	log.Printf("Adding repository %s/%s/%s", host, org, name)
 	r := &Repository{
 		Host:         host,
 		Organization: org,
@@ -232,6 +233,38 @@ func (p *Project) TotalJobCount() int {
 		cnt += p.GetRepository(i).JobCount()
 	}
 	return cnt
+}
+
+// DeleteSelectedRepositories removes selected repositories from the project
+// and deletes the files associated with them. It does not remove anything from
+// the remote repository that has already been pushed. Unlike other commands, it
+// only works on things that have been selected, it does not default to all
+// items if none are selected (like AddJobToRepositories, for example)
+func (p *Project) DeleteSelectedRepositories() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	var toDelete []*Repository
+	var toKeep []*Repository
+
+	for i := 0; i < len(p.Repositories); i++ {
+		if p.Repositories[i].Selected {
+			toDelete = append(toDelete, p.Repositories[i])
+		} else {
+			toKeep = append(toKeep, p.Repositories[i])
+		}
+	}
+	p.Repositories = toKeep
+
+	go func() {
+		for _, repo := range toDelete {
+			err := os.RemoveAll(repo.BaseDir)
+			if err != nil {
+				log.Printf("Failed to remove repository %s: %s", repo.Name, err)
+			}
+		}
+	}()
+	log.Printf("Deleting selected repositories")
 }
 
 func ReadProjectConfig(projectPath string) (*Project, error) {

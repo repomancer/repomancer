@@ -36,6 +36,34 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		d.Show()
 		w.Canvas().Focus(entry)
 	}
+	pw.Toolbar.DeleteRepository.Action = func() {
+		count := project.SelectedRepositoryCount()
+		msg := ""
+		if count == 0 {
+			dialog.ShowInformation("Delete Repositories", "No repositories selected", w)
+			return
+		} else if count == 1 {
+			msg = "Delete 1 repository?"
+		} else {
+			msg = fmt.Sprintf("Delete %d repositories?", count)
+		}
+
+		c := dialog.NewConfirm("Delete Repositories",
+			fmt.Sprintf("%s\nThis will also delete local files for selected\nrepositories but not the remote branch,\nif pushed", msg), func(confirm bool) {
+				if confirm {
+					project.DeleteSelectedRepositories()
+					pw.Refresh()
+					err := project.SaveProject()
+					if err != nil {
+						dialog.ShowError(err, w)
+					}
+				}
+			}, w)
+		c.SetConfirmText("Delete")
+		c.SetConfirmImportance(widget.DangerImportance)
+		c.Show()
+	}
+
 	pw.Toolbar.SelectAll.Action = func() {
 		project.Select(internal.All)
 		pw.Refresh()

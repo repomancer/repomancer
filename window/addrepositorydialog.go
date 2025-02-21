@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"log"
 	"repomancer/internal"
 	"repomancer/window/widgets"
 )
@@ -21,6 +22,7 @@ func AddRepositoryDialog(window fyne.Window, project *internal.Project, onAdded 
 		"Cancel",
 		[]*widget.FormItem{formItem},
 		func(b bool) {
+			log.Printf("Add Repository Dialog running: %t", b)
 			if b {
 				info, err := internal.GetRepositoryInfo(entry.Text)
 				if err != nil {
