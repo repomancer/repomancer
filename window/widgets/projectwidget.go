@@ -41,7 +41,7 @@ func ShowLogWindow(repository *internal.Repository) {
 		})
 	logText.HideSeparators = true
 
-	w2.Resize(fyne.NewSize(800, 800))
+	w2.Resize(fyne.NewSize(1100, 800))
 	w2.SetContent(logText)
 	w2.Show()
 }
