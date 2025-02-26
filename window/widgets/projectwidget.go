@@ -27,6 +27,8 @@ func ShowLogWindow(repository *internal.Repository) {
 			return w
 		}, func(item binding.DataItem, object fyne.CanvasObject) {
 			w := object.(*widget.Label)
+			w.TextStyle.Monospace = true
+			w.Wrapping = fyne.TextWrapWord
 			i := item.(binding.String)
 			w.Bind(i)
 
