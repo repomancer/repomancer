@@ -2,10 +2,7 @@ package internal
 
 import (
 	"fmt"
-	"fyne.io/fyne/v2/data/binding"
-	"log"
 	"net/url"
-	"strings"
 	"sync"
 	"time"
 )
@@ -15,6 +12,7 @@ type Repository struct {
 	Organization      string
 	Name              string
 	BaseDir           string `json:"-"` // Calculated on load, not saved with configuration
+	LogFile           string `json:"-"` // Calculated on load, not saved with configuration
 	jobs              []*Job
 	Status            string
 	Selected          bool
@@ -22,37 +20,11 @@ type Repository struct {
 	LastCommandResult error `json:"-"`
 	mu                sync.Mutex
 	RepositoryStatus  RepositoryStatus
-	logBinding        binding.StringList
-	log               []string
-}
-
-func (r *Repository) GetLogBinding() binding.StringList {
-	if r.logBinding == nil {
-		r.logBinding = binding.NewStringList()
-		err := r.logBinding.Set(r.log)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-	return r.logBinding
 }
 
 func (r *Repository) GetUrl() *url.URL {
 	repoUrl, _ := url.Parse(fmt.Sprintf("https://%s/%s/%s", r.Host, r.Organization, r.Name))
 	return repoUrl
-}
-
-func (r *Repository) Log(message string) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if strings.TrimSpace(message) == "" {
-		return
-	}
-	withTimestamp := fmt.Sprintf("[%s]: %s", time.Now().Format("2006-01-02 15:04:05"), message)
-	r.log = append(r.log, withTimestamp)
-	if r.logBinding != nil {
-		_ = r.logBinding.Set(r.log)
-	}
 }
 
 type PullRequest struct {

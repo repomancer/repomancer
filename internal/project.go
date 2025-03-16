@@ -135,6 +135,7 @@ func (p *Project) AddRepository(host, org, name string) error {
 		Organization: org,
 		Name:         name,
 		BaseDir:      path.Join(p.ProjectDir, host, org, name),
+		LogFile:      path.Join(p.ProjectDir, fmt.Sprintf("%s_%s_%s.log", host, org, name)),
 		RepositoryStatus: RepositoryStatus{
 			Cloned:             false,
 			BranchCreated:      false,
@@ -285,6 +286,7 @@ func ReadProjectConfig(projectPath string) (*Project, error) {
 	for i := 0; i < len(payload.Repositories); i++ {
 		repo := payload.Repositories[i]
 		repo.BaseDir = path.Join(projectPath, repo.Host, repo.Organization, repo.Name)
+		repo.LogFile = path.Join(projectPath, fmt.Sprintf("%s_%s_%s.log", repo.Host, repo.Organization, repo.Name))
 	}
 
 	return &payload, nil

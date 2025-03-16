@@ -1,6 +1,7 @@
 package widgets
 
 import (
+	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -8,6 +9,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
+	"os"
 	"os/exec"
 	"repomancer/internal"
 )
@@ -92,13 +94,22 @@ func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 	}
 	rw.LogsBtn.OnTapped = func() {
 		log.Printf("Viewing logs for %s", repo.Name)
-		ShowLogWindow(repo)
+		err := ShowLogWindow(repo)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-	if repo.JobCount() == 0 {
+
+	// If there's a log file for this repository, enable the View Logs button
+	if _, err := os.Stat(repo.LogFile); err == nil {
+		rw.LogsBtn.Enable()
+	} else if errors.Is(err, os.ErrNotExist) {
 		rw.LogsBtn.Disable()
 	} else {
-		rw.LogsBtn.Enable()
+		// Schrödinger: file may or may not exist.
+		rw.LogsBtn.Disable()
 	}
+
 	rw.OpenBtn.OnTapped = func() {
 		log.Printf("Opening %s", repo.Name)
 		cmd := exec.Command("open", repo.BaseDir)
