@@ -1,9 +1,9 @@
 package internal
 
 import (
-	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -27,6 +27,7 @@ type Job struct {
 	InternalCommand bool
 	// Function run when the job is complete
 	OnComplete func(*Job)
+	LogPath    string
 }
 
 func NewJob(repository *Repository, command string) *Job {
@@ -46,50 +47,62 @@ func NewInternalJob(repository *Repository, command string) *Job {
 }
 
 func (j *Job) Run() {
-	log.Printf("Running command: %s in %s", j.Command, j.Directory)
 	j.StartTime = time.Now()
-	j.Repository.Log(fmt.Sprintf("Command: %s in %s", j.Command, j.Directory))
 
-	cmd := exec.Command(ShellToUse, "-c", j.Command)
-	cmd.Dir = j.Directory
-	stdout, err := cmd.StdoutPipe()
+	logfile, err := os.OpenFile(j.Repository.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmd.Stderr = cmd.Stdout
-	// TODO: bufio.NewScanner has a maximum single line length of 4kb and a line longer than
-	// that will cause the program to exit with "bufio.Scanner: token too long".
-	// This seems acceptable for now, but could be better. This isn't really intended to dump
-	// huge amounts of logs in to memory.
-	// It's not yet clear what the best behavior would be. Just truncate that line and keep
-	// going? Alternately, write all the output to a log file per repository (bonus: durable
-	// logs between program runs. Disadvantage: more garbage spread over the filesystem, though
-	// that seems relatively minor compared to all the repository cloning. If that was done,
-	// replace the Log viewer with just something that would tail the log file. Seems like it
-	// would still be nice to have some "intelligence" to it, like highlighting commands.
-	scanner := bufio.NewScanner(stdout)
+	defer func(logfile *os.File) {
+		err := logfile.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(logfile)
+
+	_, err = logfile.Write([]byte(fmt.Sprintf("\n[%s] Running: %s in %s\n",
+		time.Now().Format(time.RFC1123),
+		j.Command,
+		j.Directory)))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd := exec.Command(ShellToUse, "-c", j.Command)
+	cmd.Dir = j.Directory
+	cmd.Stderr = logfile
+	cmd.Stdout = logfile
 	err = cmd.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
-	for scanner.Scan() {
-		j.Repository.Log(scanner.Text())
-		j.StdOut = append(j.StdOut, scanner.Text())
-	}
-	if scanner.Err() != nil {
-		_ = cmd.Process.Kill()
-		_ = cmd.Wait()
-		log.Fatal(scanner.Err())
-	}
-	err = cmd.Wait()
-	if err != nil {
-		j.Error = err
-		j.Repository.LastCommandResult = err
+	jobErr := cmd.Wait()
+	if jobErr != nil {
+		j.Error = jobErr
+		j.Repository.LastCommandResult = jobErr
 	} else {
 		j.Repository.LastCommandResult = nil
 	}
 
 	j.EndTime = time.Now()
+	var finishedMessage string
+	if jobErr != nil {
+		finishedMessage = fmt.Sprintf(
+			"[%s] Finished: %s in %s\n",
+			time.Now().Format(time.RFC1123),
+			jobErr,
+			j.EndTime.Sub(j.StartTime))
+	} else {
+		finishedMessage = fmt.Sprintf(
+			"[%s] Finished successfully in %s\n",
+			time.Now().Format(time.RFC1123),
+			j.EndTime.Sub(j.StartTime))
+	}
+
+	_, err = logfile.Write([]byte(finishedMessage))
+	if err != nil {
+		log.Fatal(err)
+	}
 	if j.Error == nil && j.OnComplete != nil {
 		j.OnComplete(j)
 	}

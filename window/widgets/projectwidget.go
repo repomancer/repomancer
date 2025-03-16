@@ -4,46 +4,22 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
+	"os/exec"
 	"repomancer/internal"
-	"strings"
 )
 
-func ShowLogWindow(repository *internal.Repository) {
-	w2 := fyne.CurrentApp().NewWindow(repository.Title())
-	cmdW := &desktop.CustomShortcut{KeyName: fyne.KeyW, Modifier: fyne.KeyModifierSuper}
-
-	w2.Canvas().AddShortcut(cmdW, func(shortcut fyne.Shortcut) {
-		w2.Hide()
-	})
-
-	logText := widget.NewListWithData(repository.GetLogBinding(),
-		func() fyne.CanvasObject {
-			w := widget.NewLabel("")
-			return w
-		}, func(item binding.DataItem, object fyne.CanvasObject) {
-			w := object.(*widget.Label)
-			w.TextStyle.Monospace = true
-			w.Wrapping = fyne.TextWrapWord
-			i := item.(binding.String)
-			w.Bind(i)
-
-			val, _ := i.Get()
-			if strings.Contains(val, "Command:") {
-				w.Importance = widget.HighImportance
-			} else {
-				w.Importance = widget.MediumImportance
-			}
-		})
-	logText.HideSeparators = true
-
-	w2.Resize(fyne.NewSize(1100, 800))
-	w2.SetContent(logText)
-	w2.Show()
+// ShowLogWindow launch the default system viewer for the repository's .log file
+// On macOS, usually the "console" app
+func ShowLogWindow(repository *internal.Repository) error {
+	cmd := exec.Command("open", repository.LogFile)
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 type ProjectWidget struct {
