@@ -1,7 +1,10 @@
 package internal
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -17,8 +20,7 @@ type Job struct {
 	Repository *Repository
 	Command    string
 	Directory  string
-	StdOut     []string
-	StdErr     string
+	Output     []byte
 	Error      error
 	StartTime  time.Time
 	EndTime    time.Time
@@ -49,30 +51,34 @@ func NewInternalJob(repository *Repository, command string) *Job {
 func (j *Job) Run() {
 	j.StartTime = time.Now()
 
-	logfile, err := os.OpenFile(j.Repository.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func(logfile *os.File) {
-		err := logfile.Close()
+	var logfile io.Writer
+	if j.InternalCommand {
+		logfile = bytes.NewBuffer([]byte{})
+	} else {
+		logfile, err := os.OpenFile(j.Repository.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			log.Fatal(err)
 		}
-	}(logfile)
-
-	_, err = logfile.Write([]byte(fmt.Sprintf("\n[%s] Running: %s in %s\n",
-		time.Now().Format(time.RFC1123),
-		j.Command,
-		j.Directory)))
-	if err != nil {
-		log.Fatal(err)
+		defer func(logfile *os.File) {
+			err := logfile.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}(logfile)
+		_, err = logfile.Write([]byte(fmt.Sprintf("\n[%s] Running: %s in %s\n",
+			time.Now().Format(time.RFC1123),
+			j.Command,
+			j.Directory)))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	cmd := exec.Command(ShellToUse, "-c", j.Command)
 	cmd.Dir = j.Directory
 	cmd.Stderr = logfile
 	cmd.Stdout = logfile
-	err = cmd.Start()
+	err := cmd.Start()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,23 +92,34 @@ func (j *Job) Run() {
 
 	j.EndTime = time.Now()
 	var finishedMessage string
-	if jobErr != nil {
-		finishedMessage = fmt.Sprintf(
-			"[%s] Finished: %s in %s\n",
-			time.Now().Format(time.RFC1123),
-			jobErr,
-			j.EndTime.Sub(j.StartTime))
-	} else {
-		finishedMessage = fmt.Sprintf(
-			"[%s] Finished successfully in %s\n",
-			time.Now().Format(time.RFC1123),
-			j.EndTime.Sub(j.StartTime))
+	if !j.InternalCommand && logfile != nil {
+		if jobErr != nil {
+			finishedMessage = fmt.Sprintf(
+				"[%s] Finished: %s in %s\n",
+				time.Now().Format(time.RFC1123),
+				jobErr,
+				j.EndTime.Sub(j.StartTime))
+		} else {
+			finishedMessage = fmt.Sprintf(
+				"[%s] Finished successfully in %s\n",
+				time.Now().Format(time.RFC1123),
+				j.EndTime.Sub(j.StartTime))
+		}
+
+		_, err = logfile.Write([]byte(finishedMessage))
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
-	_, err = logfile.Write([]byte(finishedMessage))
-	if err != nil {
-		log.Fatal(err)
+	if j.InternalCommand {
+		r := bufio.NewReader(logfile.(*bytes.Buffer))
+		j.Output, err = io.ReadAll(r)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+
 	if j.Error == nil && j.OnComplete != nil {
 		j.OnComplete(j)
 	}
