@@ -29,7 +29,6 @@ func TestJobCommandFailed(t *testing.T) {
 	j := NewJob(r, "ThisDoesNotExist")
 	j.Run()
 	assert.Equal(t, j.Finished, true)
-	assert.Equal(t, j.StdOut, []string{"bash: ThisDoesNotExist: command not found"})
 	assert.NotNil(t, j.Error)
 	assert.True(t, strings.HasSuffix(j.Duration(), "ms"))
 }

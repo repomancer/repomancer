@@ -95,7 +95,7 @@ func NewPRStatusJob(r *Repository) *Job {
 	j := NewInternalJob(r, cmd)
 	j.OnComplete = func(job *Job) {
 		var resp GitHubPrResponse
-		err := json.Unmarshal([]byte(strings.Join(job.StdOut, "\n")), &resp)
+		err := json.Unmarshal(job.Output, &resp)
 		if err != nil {
 			log.Printf("Error unmarshalling GitHub PR response: %s", err)
 			return
