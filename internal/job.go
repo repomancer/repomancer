@@ -38,7 +38,7 @@ func NewJob(repository *Repository, command string) *Job {
 		Command:         command,
 		Directory:       repository.BaseDir,
 		Finished:        false,
-		InternalCommand: false,
+		InternalCommand: true,
 	}
 }
 
