@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"net/url"
 	"sync"
 	"time"
@@ -20,6 +21,14 @@ type Repository struct {
 	LastCommandResult error `json:"-"`
 	mu                sync.Mutex
 	RepositoryStatus  RepositoryStatus
+	OnUpdated         func(repo *Repository) `json:"-"`
+}
+
+func (r *Repository) Changed() {
+	if r.OnUpdated != nil {
+		log.Printf("Repository %s changed", r.Name)
+		r.OnUpdated(r)
+	}
 }
 
 func (r *Repository) GetUrl() *url.URL {

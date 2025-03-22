@@ -50,19 +50,22 @@ func (pw *ProjectWidget) ExecuteJobQueue() {
 
 	go func() {
 		for _, repo := range repositories {
+			repo.Status = "Running..."
+			pw.Refresh()
 			for {
 				job := repo.Jobs.Pop()
+				repo.Changed()
 				if job == nil {
 					log.Printf("Finished running jobs for %s", repo.Name)
 					break
 				}
+
 				job.Run()
-				pw.Refresh()
 			}
+			repo.Status = ""
+			pw.Refresh()
 		}
 	}()
-
-	pw.statusLabel.SetText("Finished")
 	pw.Refresh()
 }
 
