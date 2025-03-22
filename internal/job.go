@@ -38,7 +38,7 @@ func NewJob(repository *Repository, command string) *Job {
 		Command:         command,
 		Directory:       repository.BaseDir,
 		Finished:        false,
-		InternalCommand: true,
+		InternalCommand: false,
 	}
 }
 
@@ -52,10 +52,11 @@ func (j *Job) Run() {
 	j.StartTime = time.Now()
 
 	var logfile io.Writer
+	var err error
 	if j.InternalCommand {
 		logfile = bytes.NewBuffer([]byte{})
 	} else {
-		logfile, err := os.OpenFile(j.Repository.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+		logfile, err = os.OpenFile(j.Repository.LogFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -64,7 +65,7 @@ func (j *Job) Run() {
 			if err != nil {
 				log.Fatal(err)
 			}
-		}(logfile)
+		}(logfile.(*os.File))
 		_, err = logfile.Write([]byte(fmt.Sprintf("\n[%s] Running: %s in %s\n",
 			time.Now().Format(time.RFC1123),
 			j.Command,
@@ -78,7 +79,7 @@ func (j *Job) Run() {
 	cmd.Dir = j.Directory
 	cmd.Stderr = logfile
 	cmd.Stdout = logfile
-	err := cmd.Start()
+	err = cmd.Start()
 	if err != nil {
 		log.Fatal(err)
 	}

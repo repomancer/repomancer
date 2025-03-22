@@ -84,7 +84,7 @@ func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 	} else {
 		rw.Selected.SetIcon(theme.CheckButtonIcon())
 	}
-	queued := repo.QueuedJobs()
+	queued := repo.Jobs.Len()
 	if queued > 1 {
 		rw.CommandsCount.SetText(fmt.Sprintf("%d jobs pending", queued))
 	} else if queued == 1 {

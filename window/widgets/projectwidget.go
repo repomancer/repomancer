@@ -45,27 +45,25 @@ func (pw *ProjectWidget) Refresh() {
 }
 
 func (pw *ProjectWidget) ExecuteJobQueue() {
-	var jobsToRun []*internal.Job
-
-	for i := 0; i < pw.project.RepositoryCount(); i++ {
-		for j := 0; j < pw.project.GetRepository(i).JobCount(); j++ {
-			if !pw.project.GetRepository(i).GetJob(j).Finished {
-				jobsToRun = append(jobsToRun, pw.project.GetRepository(i).GetJob(j))
-			}
-		}
-	}
-	log.Printf("Found %d jobs to run", len(jobsToRun))
+	repositories := pw.project.Repositories
 	pw.Refresh()
+
 	go func() {
-		// TODO: Swap this out for a stack, since jobs may add other jobs
-		for i := 0; i < len(jobsToRun); i++ {
-			pw.statusLabel.SetText(fmt.Sprintf("Running %d/%d", i+1, len(jobsToRun)))
-			jobsToRun[i].Run()
-			pw.Refresh()
+		for _, repo := range repositories {
+			for {
+				job := repo.Jobs.Pop()
+				if job == nil {
+					log.Printf("Finished running jobs for %s", repo.Name)
+					break
+				}
+				job.Run()
+				pw.Refresh()
+			}
 		}
 	}()
 
-	pw.statusLabel.SetText(fmt.Sprintf("%d jobs finished", len(jobsToRun)))
+	pw.statusLabel.SetText("Finished")
+	pw.Refresh()
 }
 
 func (pw *ProjectWidget) LoadProject(project *internal.Project) {

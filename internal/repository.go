@@ -11,9 +11,9 @@ type Repository struct {
 	Host              string
 	Organization      string
 	Name              string
-	BaseDir           string `json:"-"` // Calculated on load, not saved with configuration
-	LogFile           string `json:"-"` // Calculated on load, not saved with configuration
-	jobs              []*Job
+	BaseDir           string    `json:"-"` // Calculated on load, not saved with configuration
+	LogFile           string    `json:"-"` // Calculated on load, not saved with configuration
+	Jobs              *JobQueue `json:"-"` // Created on load, not saved with configuration
 	Status            string
 	Selected          bool
 	PullRequest       *PullRequest
@@ -44,32 +44,4 @@ type RepositoryStatus struct {
 	BranchCreated      bool
 	PullRequestCreated bool
 	PullRequestClosed  bool
-}
-
-func (r *Repository) AddJob(job *Job) {
-	r.mu.Lock()
-	r.jobs = append(r.jobs, job)
-	r.mu.Unlock()
-}
-
-func (r *Repository) GetJob(i int) *Job {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.jobs[i]
-}
-
-func (r *Repository) JobCount() int {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return len(r.jobs)
-}
-
-func (r *Repository) QueuedJobs() int {
-	cnt := 0
-	for i := 0; i < len(r.jobs); i++ {
-		if !r.jobs[i].Finished {
-			cnt++
-		}
-	}
-	return cnt
 }

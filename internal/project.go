@@ -115,7 +115,7 @@ func (p *Project) AddJobToRepositories(cmd string) {
 	selected := p.SelectedRepositories()
 	for i := 0; i < len(selected); i++ {
 		j := NewJob(selected[i], cmd)
-		selected[i].AddJob(j)
+		selected[i].Jobs.Add(j)
 	}
 }
 
@@ -124,7 +124,7 @@ func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *
 	for i := 0; i < len(selected); i++ {
 		j := NewInternalJob(selected[i], cmd)
 		j.OnComplete = onComplete
-		selected[i].AddJob(j)
+		selected[i].Jobs.Add(j)
 	}
 }
 
@@ -136,6 +136,7 @@ func (p *Project) AddRepository(host, org, name string) error {
 		Name:         name,
 		BaseDir:      path.Join(p.ProjectDir, host, org, name),
 		LogFile:      path.Join(p.ProjectDir, fmt.Sprintf("%s_%s_%s.log", host, org, name)),
+		Jobs:         NewJobQueue(),
 		RepositoryStatus: RepositoryStatus{
 			Cloned:             false,
 			BranchCreated:      false,
@@ -231,7 +232,7 @@ func (p *Project) TotalJobCount() int {
 	defer p.mu.Unlock()
 	cnt := 0
 	for i := 0; i < len(p.Repositories); i++ {
-		cnt += p.GetRepository(i).JobCount()
+		cnt += p.GetRepository(i).Jobs.Len()
 	}
 	return cnt
 }
@@ -287,6 +288,7 @@ func ReadProjectConfig(projectPath string) (*Project, error) {
 		repo := payload.Repositories[i]
 		repo.BaseDir = path.Join(projectPath, repo.Host, repo.Organization, repo.Name)
 		repo.LogFile = path.Join(projectPath, fmt.Sprintf("%s_%s_%s.log", repo.Host, repo.Organization, repo.Name))
+		repo.Jobs = NewJobQueue()
 	}
 
 	return &payload, nil
