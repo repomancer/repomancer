@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"log"
@@ -22,7 +21,6 @@ type RepositoryWidget struct {
 	Selected          *ToggleIconWidget
 	OpenBtn           *widget.Button
 	LogsBtn           *widget.Button
-	CommandsCount     *widget.Label
 	PullRequestUrl    *widget.Hyperlink
 	PullRequestInfo   *widget.Label
 }
@@ -32,7 +30,6 @@ func NewRepositoryWidget(title, comment string) *RepositoryWidget {
 		Name:              widget.NewHyperlink(title, nil),
 		Status:            widget.NewLabel(comment),
 		LastCommandResult: widget.NewLabel(""),
-		CommandsCount:     widget.NewLabel("0"),
 		Selected:          NewToggleWidget(nil),
 		OpenBtn:           widget.NewButton("Open", nil),
 		LogsBtn:           widget.NewButton("Logs", nil),
@@ -51,7 +48,7 @@ func NewRepositoryWidget(title, comment string) *RepositoryWidget {
 func (rw *RepositoryWidget) CreateRenderer() fyne.WidgetRenderer {
 	statusLine := container.NewBorder(nil,
 		nil,
-		container.NewHBox(rw.CommandsCount, rw.LastCommandResult),
+		container.NewHBox(rw.LastCommandResult),
 		container.NewHBox(rw.PullRequestUrl, rw.PullRequestInfo), rw.Status)
 	c := container.NewBorder(nil, statusLine, rw.Selected, container.NewHBox(rw.LogsBtn, rw.OpenBtn), rw.Name)
 	return widget.NewSimpleRenderer(c)
@@ -60,7 +57,7 @@ func (rw *RepositoryWidget) CreateRenderer() fyne.WidgetRenderer {
 func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 	rw.Name.SetText(repo.Title())
 	rw.Name.URL = repo.GetUrl()
-	rw.Status.Bind(binding.BindString(&repo.Status))
+	rw.Status.SetText(repo.JobStatus())
 	if repo.LastCommandResult != nil {
 		rw.LastCommandResult.SetText(fmt.Sprintf("%s", repo.LastCommandResult))
 	} else {
@@ -84,19 +81,12 @@ func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 	} else {
 		rw.Selected.SetIcon(theme.CheckButtonIcon())
 	}
-	queued := repo.Jobs.Len()
-	if queued > 1 {
-		rw.CommandsCount.SetText(fmt.Sprintf("%d jobs pending", queued))
-	} else if queued == 1 {
-		rw.CommandsCount.SetText(fmt.Sprintf("%d job pending", queued))
-	} else {
-		rw.CommandsCount.SetText("")
-	}
 	rw.LogsBtn.OnTapped = func() {
 		log.Printf("Viewing logs for %s", repo.Name)
 		err := ShowLogWindow(repo)
 		if err != nil {
-			log.Fatal(err)
+			// Todo: Show error in dialog box
+			log.Println(err)
 		}
 	}
 

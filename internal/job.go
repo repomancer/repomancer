@@ -50,7 +50,7 @@ func NewInternalJob(repository *Repository, command string) *Job {
 
 func (j *Job) Run() {
 	j.StartTime = time.Now()
-
+	log.Printf("Running %s", j.Command)
 	var logfile io.Writer
 	var err error
 	if j.InternalCommand {

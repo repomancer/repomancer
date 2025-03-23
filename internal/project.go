@@ -23,13 +23,17 @@ const (
 	ReposWithoutPullRequest
 )
 
+const WorkerCount = 5           // How many GoRoutines to use for running commands
+const RepositoryQueueSize = 512 // Maximum number of queued repositories to work on TODO: real queue instead of channels
+
 type Project struct {
 	mu                     sync.Mutex
 	Name                   string
 	PullRequestTitle       string
 	PullRequestDescription string
 	Repositories           []*Repository
-	ProjectDir             string `json:"-"` // Calculated on load, not saved with configuration
+	ProjectDir             string           `json:"-"` // Calculated on load, not saved with configuration
+	WorkerChannel          chan *Repository `json:"-"`
 }
 
 func (p *Project) Select(selectRange SelectRange) {
@@ -115,7 +119,7 @@ func (p *Project) AddJobToRepositories(cmd string) {
 	selected := p.SelectedRepositories()
 	for i := 0; i < len(selected); i++ {
 		j := NewJob(selected[i], cmd)
-		selected[i].Jobs.Add(j)
+		selected[i].AddJob(j)
 	}
 }
 
@@ -124,7 +128,7 @@ func (p *Project) AddInternalJobToRepositories(cmd string, onComplete func(job *
 	for i := 0; i < len(selected); i++ {
 		j := NewInternalJob(selected[i], cmd)
 		j.OnComplete = onComplete
-		selected[i].Jobs.Add(j)
+		selected[i].AddJob(j)
 	}
 }
 
@@ -299,7 +303,19 @@ func OpenProject(projectPath string) (*Project, error) {
 	if err != nil {
 		return &Project{}, err
 	} else {
+		project.WorkerChannel = make(chan *Repository, RepositoryQueueSize)
+		for w := 1; w <= WorkerCount; w++ {
+			go worker(w, project.WorkerChannel)
+		}
 		return project, nil
+	}
+}
+
+func worker(id int, repositories <-chan *Repository) {
+	for repo := range repositories {
+		log.Printf("Worker %d started repository %s", id, repo.Name)
+		repo.RunJobs()
+		log.Printf("Worker %d finished repository %s", id, repo.Name)
 	}
 }
 
@@ -324,6 +340,7 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 				Name:                   name,
 				PullRequestDescription: description,
 				ProjectDir:             projectPath,
+				WorkerChannel:          make(chan *Repository, RepositoryQueueSize),
 			}
 
 			f, _ := os.Create(filepath.Join(projectPath, "config.json"))
@@ -339,11 +356,12 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 			if err != nil {
 				log.Fatal(err)
 			}
+			for w := 1; w <= WorkerCount; w++ {
+				go worker(w, project.WorkerChannel)
+			}
 			return &project, nil
 		} else {
 			return &Project{}, err
 		}
 	}
-
-	return &Project{}, err
 }

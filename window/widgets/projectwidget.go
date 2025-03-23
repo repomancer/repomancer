@@ -46,27 +46,10 @@ func (pw *ProjectWidget) Refresh() {
 
 func (pw *ProjectWidget) ExecuteJobQueue() {
 	repositories := pw.project.Repositories
-	pw.Refresh()
 
-	go func() {
-		for _, repo := range repositories {
-			repo.Status = "Running..."
-			pw.Refresh()
-			for {
-				job := repo.Jobs.Pop()
-				repo.Changed()
-				if job == nil {
-					log.Printf("Finished running jobs for %s", repo.Name)
-					break
-				}
-
-				job.Run()
-			}
-			repo.Status = ""
-			pw.Refresh()
-		}
-	}()
-	pw.Refresh()
+	for _, repo := range repositories {
+		pw.project.WorkerChannel <- repo
+	}
 }
 
 func (pw *ProjectWidget) LoadProject(project *internal.Project) {
@@ -100,6 +83,7 @@ func NewProjectWidget() *ProjectWidget {
 			repo := pw.project.GetRepository(listItemId)
 			rw := obj.(*RepositoryWidget)
 			rw.Update(repo)
+			repo.OnUpdated = rw.Update
 			rw.Selected.OnTapped = func() {
 				repo.Selected = !repo.Selected
 				log.Printf("%s checked: %t", repo.Name, repo.Selected)

@@ -112,7 +112,7 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		selected := project.SelectedRepositories()
 		for _, repo := range selected {
 			job := internal.NewPushJob(repo, project)
-			repo.Jobs.Add(job)
+			repo.AddJob(job)
 		}
 		pw.ExecuteJobQueue()
 	}
@@ -138,9 +138,9 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 					// TODO: there's probably an edge case where something doesn't run here
 					// Need to switch to a single job queue/runner
 					refreshJob := internal.NewPRStatusJob(repo)
-					repo.Jobs.Add(refreshJob)
+					repo.AddJob(refreshJob)
 				}
-				repo.Jobs.Add(job)
+				repo.AddJob(job)
 			}
 			pw.ExecuteJobQueue()
 		})
@@ -152,7 +152,7 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 
 		for _, repo := range selected {
 			job := internal.NewPRStatusJob(repo)
-			repo.Jobs.Add(job)
+			repo.AddJob(job)
 		}
 		pw.ExecuteJobQueue()
 	}
