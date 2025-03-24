@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"fyne.io/fyne/v2"
 	"golang.org/x/sys/unix"
 	"log"
 	"os"
@@ -23,7 +24,6 @@ const (
 	ReposWithoutPullRequest
 )
 
-const WorkerCount = 5           // How many GoRoutines to use for running commands
 const RepositoryQueueSize = 512 // Maximum number of queued repositories to work on TODO: real queue instead of channels
 
 type Project struct {
@@ -304,7 +304,8 @@ func OpenProject(projectPath string) (*Project, error) {
 		return &Project{}, err
 	} else {
 		project.WorkerChannel = make(chan *Repository, RepositoryQueueSize)
-		for w := 1; w <= WorkerCount; w++ {
+		workerCount := fyne.CurrentApp().Preferences().IntWithFallback("workerCount", 5)
+		for w := 1; w <= workerCount; w++ {
 			go worker(w, project.WorkerChannel)
 		}
 		return project, nil
@@ -356,7 +357,8 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			for w := 1; w <= WorkerCount; w++ {
+			workerCount := fyne.CurrentApp().Preferences().IntWithFallback("workerCount", 5)
+			for w := 1; w <= workerCount; w++ {
 				go worker(w, project.WorkerChannel)
 			}
 			return &project, nil
