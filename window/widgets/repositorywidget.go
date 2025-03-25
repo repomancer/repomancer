@@ -87,6 +87,7 @@ func (rw *RepositoryWidget) Update(repo *internal.Repository) {
 		if err != nil {
 			// Todo: Show error in dialog box
 			log.Println(err)
+			rw.LogsBtn.Disable()
 		}
 	}
 
