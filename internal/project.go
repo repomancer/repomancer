@@ -304,8 +304,7 @@ func OpenProject(projectPath string) (*Project, error) {
 		return &Project{}, err
 	} else {
 		project.WorkerChannel = make(chan *Repository, RepositoryQueueSize)
-		workerCount := fyne.CurrentApp().Preferences().IntWithFallback("workerCount", 5)
-		for w := 1; w <= workerCount; w++ {
+		for w := 1; w <= workerCount(); w++ {
 			go worker(w, project.WorkerChannel)
 		}
 		return project, nil
@@ -357,13 +356,24 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			workerCount := fyne.CurrentApp().Preferences().IntWithFallback("workerCount", 5)
-			for w := 1; w <= workerCount; w++ {
+
+			for w := 1; w <= workerCount(); w++ {
 				go worker(w, project.WorkerChannel)
 			}
 			return &project, nil
 		} else {
 			return &Project{}, err
 		}
+	}
+}
+
+// workerCount returns the number of workers to use. This is configurable, but defaults
+// to 1 if the Fyne framework is not running.
+func workerCount() int {
+	currentApp := fyne.CurrentApp()
+	if currentApp != nil {
+		return currentApp.Preferences().IntWithFallback("workerCount", 5)
+	} else {
+		return 1
 	}
 }
