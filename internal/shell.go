@@ -2,21 +2,40 @@ package internal
 
 import (
 	"bytes"
+	"context"
+	"errors"
+	"fmt"
 	"os/exec"
+	"time"
 )
 
-const ShellToUse = "bash"
-
-// ShellOut is for running a shell command that should NOT be run per repository. For that,
+// RunCommand is for running a shell command that should NOT be run per repository. For that,
 // create a Job and use Repository.AddJob()
-func ShellOut(command string, directory string) (string, string, error) {
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
+func RunCommand(dir string, timeoutSeconds int, command string, args ...string) (stdout string, stderr string, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
 
-	cmd := exec.Command(ShellToUse, "-c", command)
-	cmd.Dir = directory
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	return stdout.String(), stderr.String(), err
+	// Create the command with the context
+	cmd := exec.CommandContext(ctx, command, args...)
+
+	// Set the working directory if specified
+	if dir != "" {
+		cmd.Dir = dir
+	}
+
+	// Create buffers to capture stdout and stderr
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+
+	// Run the command
+	err = cmd.Run()
+
+	// Check if the context deadline was exceeded
+	if errors.Is(context.DeadlineExceeded, ctx.Err()) {
+		return "", "", fmt.Errorf("command timed out after %d seconds", timeoutSeconds)
+	}
+
+	// Return the captured output and any error
+	return stdoutBuf.String(), stderrBuf.String(), err
 }

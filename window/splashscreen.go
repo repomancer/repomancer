@@ -35,11 +35,7 @@ func (s *StartScreen) Logf(format string, args ...interface{}) {
 }
 
 func checkRequirements() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	stdout, stderr, err := internal.ShellOut("gh --version", home)
+	stdout, stderr, err := internal.RunCommand("", 3, "gh", "--version")
 	if err != nil {
 		return stderr, err
 	}

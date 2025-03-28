@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+const ShellToUse = "bash"
+
 // Job represents a shell command run asynchronously in a specific repository's directory
 // The command's stdout, stderr and error are captured.
 // It is expected (but not specifically enforced) that only a single Job will be executing in
