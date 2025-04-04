@@ -13,10 +13,6 @@ import (
 var topWindow fyne.Window
 
 func main() {
-
-	state := internal.State{}
-	state.App = app.NewWithID("com.sheersky.repomancer")
-
 	a := app.NewWithID("com.sheersky.repomancer")
 	a.SetIcon(data.FyneLogo)
 	screens.LogLifecycle(a)
@@ -28,14 +24,13 @@ func main() {
 
 	if len(os.Args) < 2 {
 		w.SetContent(screens.NewStartScreen(a, w))
-		w.Resize(fyne.NewSize(400, 600))
 	} else {
 		project, err := internal.OpenProject(os.Args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
-		window := screens.NewProjectWindow(&state, project)
-		window.ShowAndRun()
+		w.SetContent(screens.NewProjectWindow(w, project))
+
 	}
 	w.ShowAndRun()
 

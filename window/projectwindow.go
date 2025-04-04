@@ -14,9 +14,7 @@ import (
 	"strings"
 )
 
-func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Window {
-	w := state.NewQuitWindow(project.Name)
-
+func NewProjectWindow(w fyne.Window, project *internal.Project) fyne.CanvasObject {
 	pw := widgets.NewProjectWidget()
 	pw.LoadProject(project)
 
@@ -228,5 +226,5 @@ func NewProjectWindow(state *internal.State, project *internal.Project) fyne.Win
 		}
 	})
 
-	return w
+	return pw
 }

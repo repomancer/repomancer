@@ -11,15 +11,19 @@ import (
 )
 
 func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
-	newItem := fyne.NewMenuItem("New Project", nil)
-	openItem := fyne.NewMenuItem("Open Project", nil)
+	newItem := fyne.NewMenuItem("New Project", func() {
+		log.Println("New Project")
+		// TODO: New project
+	})
+	openItem := fyne.NewMenuItem("Open Project", func() {
+		log.Println("Open Project")
+		// TODO: Open project
+	})
 	//checkedItem := fyne.NewMenuItem("Checked", nil)
 	//checkedItem.Checked = true
 	//disabledItem := fyne.NewMenuItem("Disabled", nil)
 	//disabledItem.Disabled = true
 	//otherItem := fyne.NewMenuItem("Other", nil)
-	mailItem := fyne.NewMenuItem("Mail", func() { fmt.Println("Menu New->Other->Mail") })
-	mailItem.Icon = theme.MailComposeIcon()
 
 	fileItem := fyne.NewMenuItem("File", func() { fmt.Println("Menu New->File") })
 	fileItem.Icon = theme.FileIcon()
