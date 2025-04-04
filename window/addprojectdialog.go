@@ -12,7 +12,7 @@ import (
 )
 
 func NewAddProjectDialog(window fyne.Window, onAdded func(name string, location string)) (*dialog.FormDialog, *widgets.ShortcutHandlingEntry) {
-	name := widgets.NewShortcutHandlingEntry(window, true)
+	name := widgets.NewShortcutHandlingEntry(window)
 	name.SetPlaceHolder("my-project")
 	name.AllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQSTUVWXYZ0123456789_-/"
 	name.MaxLength = 50

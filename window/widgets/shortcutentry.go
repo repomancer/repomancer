@@ -43,16 +43,15 @@ func (m *ShortcutHandlingEntry) TypedRune(r rune) {
 	}
 }
 
-func NewShortcutHandlingEntry(window fyne.Window, isMainWindow bool) *ShortcutHandlingEntry {
+func NewShortcutHandlingEntry(window fyne.Window) *ShortcutHandlingEntry {
 	item := &ShortcutHandlingEntry{}
 	item.ExtendBaseWidget(item)
 	item.HandleShortcut = func(s *desktop.CustomShortcut) {
 		if s.KeyName == fyne.KeyW && s.Modifier == desktop.SuperModifier {
-			if isMainWindow {
-				window.Close()
-			} else {
-				window.Hide()
-			}
+			window.Close()
+		}
+		if s.KeyName == fyne.KeyEscape {
+			window.Close()
 		}
 	}
 	item.MaxLength = -1
