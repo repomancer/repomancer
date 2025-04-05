@@ -12,6 +12,7 @@ type ProjectToolbarWidget struct {
 	AddRepository            *fyne.MenuItem
 	AddMultipleRepositories  *fyne.MenuItem
 	DeleteRepository         *fyne.MenuItem
+	DeleteLogs               *fyne.MenuItem
 	SelectMenu               *ContextMenuButton
 	SelectAll                *fyne.MenuItem
 	SelectNone               *fyne.MenuItem
@@ -35,7 +36,8 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 	item := &ProjectToolbarWidget{
 		AddRepository:            fyne.NewMenuItem("Add", nil),
 		AddMultipleRepositories:  fyne.NewMenuItem("Add Multiple", nil),
-		DeleteRepository:         fyne.NewMenuItem("Delete Selected", nil),
+		DeleteRepository:         fyne.NewMenuItem("Delete Selected Repositories", nil),
+		DeleteLogs:               fyne.NewMenuItem("Delete Selected Logs", nil),
 		SelectAll:                fyne.NewMenuItem("All", nil),
 		SelectNone:               fyne.NewMenuItem("None", nil),
 		SelectErrors:             fyne.NewMenuItem("Errors", nil),
@@ -55,7 +57,7 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 	}
 	item.ExtendBaseWidget(item)
 	item.RepositoryMenu = NewContextMenuButton("Repository...", fyne.NewMenu("Repository",
-		item.AddRepository, item.AddMultipleRepositories, item.DeleteRepository))
+		item.AddRepository, item.AddMultipleRepositories, fyne.NewMenuItemSeparator(), item.DeleteRepository, item.DeleteLogs))
 
 	item.SelectMenu = NewContextMenuButton("Select...",
 		fyne.NewMenu("Select",

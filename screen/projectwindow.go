@@ -63,6 +63,34 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		c.Show()
 	}
 
+	pw.Toolbar.DeleteLogs.Action = func() {
+		count := project.SelectedRepositoryCount()
+		msg := ""
+		if count == 0 {
+			dialog.ShowInformation("Delete Repositories", "No repositories selected", w)
+			return
+		} else if count == 1 {
+			msg = "Delete logs for 1 repository?"
+		} else {
+			msg = fmt.Sprintf("Delete logs for %d repositories?", count)
+		}
+
+		c := dialog.NewConfirm("Delete Logs",
+			fmt.Sprintf("%s\nThis will delete log files but leave all repository files intact", msg), func(confirm bool) {
+				if confirm {
+					project.DeleteSelectedLogs()
+					pw.Refresh()
+					err := project.SaveProject()
+					if err != nil {
+						dialog.ShowError(err, w)
+					}
+				}
+			}, w)
+		c.SetConfirmText("Delete Logs")
+		c.SetConfirmImportance(widget.DangerImportance)
+		c.Show()
+	}
+
 	pw.Toolbar.SelectAll.Action = func() {
 		project.Select(internal.All)
 		pw.Refresh()

@@ -273,6 +273,29 @@ func (p *Project) DeleteSelectedRepositories() {
 	log.Printf("Deleting selected repositories")
 }
 
+func (p *Project) DeleteSelectedLogs() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	var toDelete []*Repository
+
+	for i := 0; i < len(p.Repositories); i++ {
+		if p.Repositories[i].Selected {
+			toDelete = append(toDelete, p.Repositories[i])
+		}
+	}
+
+	go func() {
+		for _, repo := range toDelete {
+			err := os.Remove(repo.LogFile)
+			if err != nil {
+				log.Printf("Failed to remove logfile for %s: %s", repo.Name, err)
+			}
+		}
+	}()
+	log.Printf("Deleting selected repository logs")
+}
+
 func ReadProjectConfig(projectPath string) (*Project, error) {
 	content, err := os.ReadFile(filepath.Join(projectPath, "config.json"))
 	if err != nil {

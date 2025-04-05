@@ -39,8 +39,10 @@ func (pw *ProjectWidget) Refresh() {
 	pw.statusLabel.SetText(msg)
 	if selectedCount > 0 {
 		pw.Toolbar.DeleteRepository.Disabled = false
+		pw.Toolbar.DeleteLogs.Disabled = false
 	} else {
 		pw.Toolbar.DeleteRepository.Disabled = true
+		pw.Toolbar.DeleteLogs.Disabled = true
 	}
 }
 
