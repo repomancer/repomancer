@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"repomancer/internal"
-	"repomancer/window/widgets"
+	"repomancer/screen/widgets"
 )
 
 func AddRepositoryDialog(window fyne.Window, project *internal.Project, onAdded func()) (*dialog.FormDialog, *widgets.EscapeEntry) {

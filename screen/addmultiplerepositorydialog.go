@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"repomancer/internal"
-	"repomancer/window/widgets"
+	"repomancer/screen/widgets"
 	"strings"
 )
 

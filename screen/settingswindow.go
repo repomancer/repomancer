@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"os"
-	"repomancer/window/widgets"
+	"repomancer/screen/widgets"
 	"strconv"
 	"strings"
 )
@@ -27,7 +27,7 @@ func NewSettingsWindow(a fyne.App) fyne.Window {
 	})
 	w.SetOnClosed(func() {
 		settingsWindow = nil
-		log.Println("Settings window closed")
+		log.Println("Settings screen closed")
 	})
 
 	locationLbl := widgets.NewLabelWithHelpWidget("Default Location", "Directory where new projects will be created", w)

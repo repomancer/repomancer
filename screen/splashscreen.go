@@ -23,8 +23,8 @@ func checkRequirements() (string, error) {
 	return "Found gh command\n" + stdout, err
 }
 
-func NewStartScreen(app fyne.App, w fyne.Window) *fyne.Container {
-	w.Resize(fyne.NewSize(400, 600))
+func GotoStartScreen(app fyne.App, w fyne.Window) {
+	w.Resize(fyne.NewSize(500, 600))
 
 	newBtn := widget.NewButton("New Project", nil)
 	openBtn := widget.NewButton("Open Project", nil)
@@ -47,8 +47,7 @@ func NewStartScreen(app fyne.App, w fyne.Window) *fyne.Container {
 				dialog.ShowError(err, w)
 				return
 			}
-			projectWidget := NewProjectWindow(w, project)
-			w.SetContent(projectWidget)
+			GotoProjectScreen(w, project)
 		})
 		d.Show()
 		w.Canvas().Focus(focus)
@@ -66,8 +65,7 @@ func NewStartScreen(app fyne.App, w fyne.Window) *fyne.Container {
 			if err != nil {
 				dialog.ShowError(err, w)
 			} else {
-				projectWidget := NewProjectWindow(w, project)
-				w.SetContent(projectWidget)
+				GotoProjectScreen(w, project)
 			}
 		}, w)
 
@@ -118,5 +116,5 @@ func NewStartScreen(app fyne.App, w fyne.Window) *fyne.Container {
 	}()
 
 	screen := container.NewBorder(top, nil, nil, nil, content)
-	return screen
+	w.SetContent(screen)
 }

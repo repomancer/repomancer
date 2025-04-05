@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"repomancer/internal"
-	"repomancer/window"
+	"repomancer/screen"
 )
 
 var topWindow fyne.Window
@@ -16,20 +16,20 @@ func main() {
 	a := app.NewWithID("com.sheersky.repomancer")
 	a.SetIcon(data.FyneLogo)
 	screens.LogLifecycle(a)
-	w := a.NewWindow("Fyne Demo")
+	w := a.NewWindow("Repomancer")
 	topWindow = w
 
 	w.SetMainMenu(screens.MakeMenu(a, w))
 	w.SetMaster()
 
 	if len(os.Args) < 2 {
-		w.SetContent(screens.NewStartScreen(a, w))
+		screens.GotoStartScreen(a, w)
 	} else {
 		project, err := internal.OpenProject(os.Args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
-		w.SetContent(screens.NewProjectWindow(w, project))
+		screens.GotoProjectScreen(w, project)
 
 	}
 	w.ShowAndRun()

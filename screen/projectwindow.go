@@ -9,18 +9,18 @@ import (
 	"os"
 	"path"
 	"repomancer/internal"
-	"repomancer/window/widgets"
+	"repomancer/screen/widgets"
 	"sort"
 	"strings"
 )
 
-func NewProjectWindow(w fyne.Window, project *internal.Project) fyne.CanvasObject {
+func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 	pw := widgets.NewProjectWidget()
 	pw.LoadProject(project)
 
 	w.Resize(fyne.NewSize(1000, 800))
-	w.SetMaster()
 	w.SetContent(pw)
+	w.SetTitle(fmt.Sprintf("Repomancer - %s", project.Name))
 
 	pw.Toolbar.AddRepository.Action = func() {
 		d, entry := AddRepositoryDialog(w, project, func() { pw.Refresh() })
@@ -133,8 +133,6 @@ func NewProjectWindow(w fyne.Window, project *internal.Project) fyne.CanvasObjec
 			for _, repo := range selected {
 				job := internal.NewPullRequestJob(repo, project)
 				job.OnComplete = func(job *internal.Job) {
-					// TODO: there's probably an edge case where something doesn't run here
-					// Need to switch to a single job queue/runner
 					refreshJob := internal.NewPRStatusJob(repo)
 					repo.AddJob(refreshJob)
 				}
@@ -225,6 +223,4 @@ func NewProjectWindow(w fyne.Window, project *internal.Project) fyne.CanvasObjec
 			log.Printf("Error saving project: %s", err)
 		}
 	})
-
-	return pw
 }

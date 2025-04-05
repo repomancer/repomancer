@@ -7,7 +7,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"log"
 	"os"
-	"repomancer/window/widgets"
+	"repomancer/screen/widgets"
 	"strings"
 )
 
