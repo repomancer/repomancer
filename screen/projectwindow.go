@@ -228,6 +228,14 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		dialog.ShowInformation("Project Statistics", strings.Join(msg, "\n"), w)
 	}
 
+	pw.CommandInput.OnChanged = func(s string) {
+		pw.CommandInput.Refresh()
+		if strings.TrimSpace(s) == "" {
+			pw.RunBtn.Disable()
+		} else {
+			pw.RunBtn.Enable()
+		}
+	}
 	pw.CommandInput.OnSubmitted = func(s string) {
 		cmd := strings.TrimSpace(pw.CommandInput.Text)
 		log.Println("cmd:", cmd)
