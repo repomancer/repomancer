@@ -39,8 +39,7 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		count := project.SelectedRepositoryCount()
 		msg := ""
 		if count == 0 {
-			dialog.ShowInformation("Delete Repositories", "No repositories selected", w)
-			return
+			msg = "Delete all repositories?"
 		} else if count == 1 {
 			msg = "Delete 1 repository?"
 		} else {
@@ -67,15 +66,14 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		count := project.SelectedRepositoryCount()
 		msg := ""
 		if count == 0 {
-			dialog.ShowInformation("Delete Repositories", "No repositories selected", w)
-			return
+			msg = "Clear logs for all repositories?"
 		} else if count == 1 {
-			msg = "Delete logs for 1 repository?"
+			msg = "Clear logs for 1 repository?"
 		} else {
-			msg = fmt.Sprintf("Delete logs for %d repositories?", count)
+			msg = fmt.Sprintf("Clear logs for %d repositories?", count)
 		}
 
-		c := dialog.NewConfirm("Delete Logs",
+		c := dialog.NewConfirm("Clear Logs",
 			fmt.Sprintf("%s\nThis will delete log files but leave all repository files intact", msg), func(confirm bool) {
 				if confirm {
 					project.DeleteSelectedLogs()
@@ -230,12 +228,7 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 	}
 
 	pw.CommandInput.OnChanged = func(s string) {
-		pw.CommandInput.Refresh()
-		if strings.TrimSpace(s) == "" {
-			pw.RunBtn.Disable()
-		} else {
-			pw.RunBtn.Enable()
-		}
+		pw.Refresh()
 	}
 	pw.CommandInput.OnSubmitted = func(s string) {
 		cmd := strings.TrimSpace(pw.CommandInput.Text)

@@ -243,23 +243,29 @@ func (p *Project) TotalJobCount() int {
 
 // DeleteSelectedRepositories removes selected repositories from the project
 // and deletes the files associated with them. It does not remove anything from
-// the remote repository that has already been pushed. Unlike other commands, it
-// only works on things that have been selected, it does not default to all
-// items if none are selected (like AddJobToRepositories, for example)
+// the remote repository that has already been pushed.
+// If no repositories are selected, all repositories are deleted. This should only
+// after giving the user an "are you sure" prompt.
 func (p *Project) DeleteSelectedRepositories() {
+	selectedCount := p.SelectedRepositoryCount()
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	var toDelete []*Repository
 	var toKeep []*Repository
 
-	for i := 0; i < len(p.Repositories); i++ {
-		if p.Repositories[i].Selected {
-			toDelete = append(toDelete, p.Repositories[i])
-		} else {
-			toKeep = append(toKeep, p.Repositories[i])
+	if selectedCount == 0 {
+		toDelete = append(toDelete, p.Repositories...)
+	} else {
+		for i := 0; i < len(p.Repositories); i++ {
+			if p.Repositories[i].Selected {
+				toDelete = append(toDelete, p.Repositories[i])
+			} else {
+				toKeep = append(toKeep, p.Repositories[i])
+			}
 		}
 	}
+
 	p.Repositories = toKeep
 
 	go func() {
@@ -274,16 +280,9 @@ func (p *Project) DeleteSelectedRepositories() {
 }
 
 func (p *Project) DeleteSelectedLogs() {
+	toDelete := p.SelectedRepositories()
 	p.mu.Lock()
 	defer p.mu.Unlock()
-
-	var toDelete []*Repository
-
-	for i := 0; i < len(p.Repositories); i++ {
-		if p.Repositories[i].Selected {
-			toDelete = append(toDelete, p.Repositories[i])
-		}
-	}
 
 	go func() {
 		for _, repo := range toDelete {

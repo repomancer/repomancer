@@ -9,6 +9,7 @@ import (
 	"log"
 	"os/exec"
 	"repomancer/internal"
+	"strings"
 )
 
 // ShowLogWindow launch the default system viewer for the repository's .log file
@@ -37,12 +38,20 @@ func (pw *ProjectWidget) Refresh() {
 	selectedCount := pw.project.SelectedRepositoryCount()
 	msg := fmt.Sprintf("%d/%d Selected", selectedCount, pw.project.RepositoryCount())
 	pw.statusLabel.SetText(msg)
-	if selectedCount > 0 {
-		pw.Toolbar.DeleteRepository.Disabled = false
-		pw.Toolbar.DeleteLogs.Disabled = false
+	if selectedCount == 0 {
+		pw.Toolbar.DeleteRepository.Label = fmt.Sprintf("Delete All Repositories")
+		pw.Toolbar.DeleteLogs.Label = fmt.Sprintf("Delete All Logs")
+	} else if selectedCount == 1 {
+		pw.Toolbar.DeleteRepository.Label = "Delete 1 Repository"
+		pw.Toolbar.DeleteLogs.Label = "Clear 1 Log"
 	} else {
-		pw.Toolbar.DeleteRepository.Disabled = true
-		pw.Toolbar.DeleteLogs.Disabled = true
+		pw.Toolbar.DeleteRepository.Label = fmt.Sprintf("Delete %d Repositories", selectedCount)
+		pw.Toolbar.DeleteLogs.Label = fmt.Sprintf("Clear %d Logs", selectedCount)
+	}
+	if strings.TrimSpace(pw.CommandInput.Text) == "" || pw.project.RepositoryCount() == 0 {
+		pw.RunBtn.Disable()
+	} else {
+		pw.RunBtn.Enable()
 	}
 }
 
@@ -56,6 +65,7 @@ func (pw *ProjectWidget) ExecuteJobQueue() {
 
 func (pw *ProjectWidget) LoadProject(project *internal.Project) {
 	pw.project = project
+	pw.Refresh()
 }
 
 func (pw *ProjectWidget) CreateRenderer() fyne.WidgetRenderer {
@@ -95,14 +105,7 @@ func NewProjectWidget() *ProjectWidget {
 					rw.Selected.SetIcon(theme.CheckButtonIcon())
 				}
 				rw.Selected.Refresh()
-				selectedCount := pw.project.SelectedRepositoryCount()
-				msg := fmt.Sprintf("%d/%d Selected", selectedCount, pw.project.RepositoryCount())
-				pw.statusLabel.SetText(msg)
-				if selectedCount > 0 {
-					pw.Toolbar.DeleteRepository.Disabled = false
-				} else {
-					pw.Toolbar.DeleteRepository.Disabled = true
-				}
+				pw.Refresh()
 			}
 
 		},
