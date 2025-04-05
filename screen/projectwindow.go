@@ -84,6 +84,7 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 					if err != nil {
 						dialog.ShowError(err, w)
 					}
+					pw.Refresh()
 				}
 			}, w)
 		c.SetConfirmText("Delete Logs")
