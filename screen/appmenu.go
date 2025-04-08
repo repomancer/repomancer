@@ -3,6 +3,7 @@ package screens
 import (
 	"fmt"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -36,7 +37,10 @@ func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	}
 	showAbout := func() {
 		w := a.NewWindow("About")
-		w.SetContent(widget.NewLabel("About Repomancer..."))
+		msg := "Repomancer " + fyne.CurrentApp().Metadata().Version
+		homepage := "https://github.com/jashort/repomancer"
+		u, _ := url.Parse(homepage)
+		w.SetContent(container.NewVBox(widget.NewLabel(msg), widget.NewHyperlink(homepage, u), widget.NewButton("Close", func() { w.Close() })))
 		w.Show()
 	}
 	aboutItem := fyne.NewMenuItem("About", showAbout)
