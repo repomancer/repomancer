@@ -37,7 +37,12 @@ func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 	}
 	showAbout := func() {
 		w := a.NewWindow("About")
-		msg := "Repomancer " + fyne.CurrentApp().Metadata().Version
+		msg := fmt.Sprintf("Repomancer %s (Build %d)", fyne.CurrentApp().Metadata().Version, fyne.CurrentApp().Metadata().Build)
+		msg += "\n\n"
+		msg += "Repository changes at scale"
+		msg += fyne.CurrentApp().Metadata().Custom["Repository"]
+		ca := fyne.CurrentApp().Metadata()
+		log.Printf("%v", ca)
 		homepage := "https://github.com/jashort/repomancer"
 		u, _ := url.Parse(homepage)
 		w.SetContent(container.NewVBox(widget.NewLabel(msg), widget.NewHyperlink(homepage, u), widget.NewButton("Close", func() { w.Close() })))
