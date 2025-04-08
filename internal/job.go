@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const ShellToUse = "bash"
+const ShellToUse = "zsh"
 
 // Job represents a shell command run asynchronously in a specific repository's directory
 // The command's stdout, stderr and error are captured.
@@ -77,7 +77,7 @@ func (j *Job) Run() {
 		}
 	}
 
-	cmd := exec.Command(ShellToUse, "-c", j.Command)
+	cmd := exec.Command(ShellToUse, "-c", "-i", j.Command)
 	cmd.Dir = j.Directory
 	cmd.Stderr = logfile
 	cmd.Stdout = logfile
