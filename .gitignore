@@ -26,3 +26,5 @@ go.work.sum
 
 .idea
 Repomancer.app/
+*.zip
+.DS_Store
