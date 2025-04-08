@@ -40,7 +40,7 @@ func (pw *ProjectWidget) Refresh() {
 	pw.statusLabel.SetText(msg)
 	if selectedCount == 0 {
 		pw.Toolbar.DeleteRepository.Label = fmt.Sprintf("Delete All Repositories")
-		pw.Toolbar.DeleteLogs.Label = fmt.Sprintf("Delete All Logs")
+		pw.Toolbar.DeleteLogs.Label = fmt.Sprintf("Clear All Logs")
 	} else if selectedCount == 1 {
 		pw.Toolbar.DeleteRepository.Label = "Delete 1 Repository"
 		pw.Toolbar.DeleteLogs.Label = "Clear 1 Log"
