@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"sync"
 	"time"
@@ -27,8 +26,6 @@ type Repository struct {
 func (r *Repository) changed() {
 	if r.OnUpdated != nil {
 		r.OnUpdated(r)
-	} else {
-		log.Printf("Repository %s has no OnUpdated", r.Name)
 	}
 }
 

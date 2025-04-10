@@ -116,15 +116,15 @@ func ShortcutFocused(s fyne.Shortcut, w fyne.Window) {
 
 func LogLifecycle(a fyne.App) {
 	a.Lifecycle().SetOnStarted(func() {
-		log.Println("Lifecycle: Started")
+		//log.Println("Lifecycle: Started")
 	})
 	a.Lifecycle().SetOnStopped(func() {
-		log.Println("Lifecycle: Stopped")
+		//log.Println("Lifecycle: Stopped")
 	})
 	a.Lifecycle().SetOnEnteredForeground(func() {
-		log.Println("Lifecycle: Entered Foreground")
+		//log.Println("Lifecycle: Entered Foreground")
 	})
 	a.Lifecycle().SetOnExitedForeground(func() {
-		log.Println("Lifecycle: Exited Foreground")
+		//log.Println("Lifecycle: Exited Foreground")
 	})
 }
