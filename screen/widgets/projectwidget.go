@@ -95,7 +95,9 @@ func NewProjectWidget() *ProjectWidget {
 			repo := pw.project.GetRepository(listItemId)
 			rw := obj.(*RepositoryWidget)
 			rw.Update(repo)
-			repo.OnUpdated = func(_ *internal.Repository) { pw.list.Refresh() }
+			repo.OnUpdated = func(_ *internal.Repository) {
+				fyne.Do(pw.list.Refresh)
+			}
 			rw.Selected.OnTapped = func() {
 				repo.Selected = !repo.Selected
 				log.Printf("%s checked: %t", repo.Name, repo.Selected)
