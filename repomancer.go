@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
 	"log"
@@ -10,14 +9,11 @@ import (
 	"repomancer/screen"
 )
 
-var topWindow fyne.Window
-
 func main() {
 	a := app.NewWithID("com.sheersky.repomancer")
 	a.SetIcon(data.FyneLogo)
 	screens.LogLifecycle(a)
 	w := a.NewWindow("Repomancer")
-	topWindow = w
 
 	w.SetMainMenu(screens.MakeMenu(a, w))
 	w.SetMaster()
