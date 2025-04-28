@@ -7,10 +7,10 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jashort/repomancer/internal"
 	"log"
 	"os"
 	"os/exec"
-	"repomancer/internal"
 )
 
 type RepositoryWidget struct {

@@ -3,10 +3,10 @@ package main
 import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
+	"github.com/jashort/repomancer/internal"
+	"github.com/jashort/repomancer/screen"
 	"log"
 	"os"
-	"repomancer/internal"
-	"repomancer/screen"
 )
 
 func main() {

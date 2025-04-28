@@ -5,8 +5,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
-	"repomancer/internal"
-	"repomancer/screen/widgets"
+	"github.com/jashort/repomancer/internal"
+	"github.com/jashort/repomancer/screen/widgets"
 	"strings"
 )
 

@@ -9,10 +9,10 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jashort/repomancer/internal"
 	"image/color"
 	"log"
 	"os"
-	"repomancer/internal"
 )
 
 func checkRequirements() (string, error) {

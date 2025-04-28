@@ -7,9 +7,9 @@ import (
 	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jashort/repomancer/screen/widgets"
 	"log"
 	"os"
-	"repomancer/screen/widgets"
 	"strconv"
 	"strings"
 )

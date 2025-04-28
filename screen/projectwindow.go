@@ -5,11 +5,11 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/jashort/repomancer/internal"
+	"github.com/jashort/repomancer/screen/widgets"
 	"log"
 	"os"
 	"path"
-	"repomancer/internal"
-	"repomancer/screen/widgets"
 	"sort"
 	"strings"
 )
