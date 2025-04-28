@@ -102,17 +102,19 @@ func GotoStartScreen(app fyne.App, w fyne.Window) {
 
 	go func() {
 		msg, err := checkRequirements()
-		if err != nil {
-			status.SetText(fmt.Sprintf("%s\n%s", msg, "gh must be available on the path. Install it from https://cli.github.com/ and restart Repomancer"))
-			newBtn.Disable()
-			openBtn.Disable()
-			settingsBtn.Disable()
-		} else {
-			status.SetText(msg)
-			newBtn.Enable()
-			openBtn.Enable()
-			settingsBtn.Enable()
-		}
+		fyne.Do(func() {
+			if err != nil {
+				status.SetText(fmt.Sprintf("%s\n%s", msg, "gh must be available on the path. Install it from https://cli.github.com/ and restart Repomancer"))
+				newBtn.Disable()
+				openBtn.Disable()
+				settingsBtn.Disable()
+			} else {
+				status.SetText(msg)
+				newBtn.Enable()
+				openBtn.Enable()
+				settingsBtn.Enable()
+			}
+		})
 	}()
 
 	screen := container.NewBorder(top, nil, nil, nil, content)
