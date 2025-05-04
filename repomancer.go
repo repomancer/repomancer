@@ -3,8 +3,8 @@ package main
 import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/cmd/fyne_demo/data"
-	"github.com/jashort/repomancer/internal"
-	"github.com/jashort/repomancer/screen"
+	"github.com/repomancer/repomancer/internal"
+	"github.com/repomancer/repomancer/screen"
 	"log"
 	"os"
 )

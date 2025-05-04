@@ -21,7 +21,7 @@ Assuming you have `go` installed, install Repomancer by:
 
 2. Install Repomancer:
     ```shell
-    GOPROXY=direct go install github.com/jashort/repomancer@v0.0.1
+    GOPROXY=direct go install github.com/repomancer/repomancer@v0.0.1
     ```
 
 3. Configure GitHub credentials:

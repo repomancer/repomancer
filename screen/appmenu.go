@@ -43,7 +43,7 @@ func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 		msg += fyne.CurrentApp().Metadata().Custom["Repository"]
 		ca := fyne.CurrentApp().Metadata()
 		log.Printf("%v", ca)
-		homepage := "https://github.com/jashort/repomancer"
+		homepage := "https://github.com/repomancer/repomancer"
 		u, _ := url.Parse(homepage)
 		w.SetContent(container.NewVBox(widget.NewLabel(msg), widget.NewHyperlink(homepage, u), widget.NewButton("Close", func() { w.Close() })))
 		w.Show()
@@ -80,7 +80,7 @@ func MakeMenu(a fyne.App, w fyne.Window) *fyne.MainMenu {
 
 	helpMenu := fyne.NewMenu("Help",
 		fyne.NewMenuItem("Documentation", func() {
-			u, _ := url.Parse("https://github.com/jashort/repomancer")
+			u, _ := url.Parse("https://github.com/repomancer/repomancer")
 			_ = a.OpenURL(u)
 		}),
 	)

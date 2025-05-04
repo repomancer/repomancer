@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
-	"github.com/jashort/repomancer/internal"
+	"github.com/repomancer/repomancer/internal"
 	"image/color"
 	"log"
 	"os"

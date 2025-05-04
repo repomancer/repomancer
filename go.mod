@@ -1,4 +1,4 @@
-module github.com/jashort/repomancer
+module github.com/repomancer/repomancer
 
 go 1.23.6
 
