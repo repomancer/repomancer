@@ -56,7 +56,7 @@ func NewAddProjectDialog(window fyne.Window, onAdded func(name string, location 
 			}
 		},
 		window)
-
+	d.Resize(fyne.NewSize(450, 300))
 	name.OnSubmitted = func(s string) {
 		d.Submit()
 	}
