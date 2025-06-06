@@ -63,8 +63,8 @@ func NewProjectToolbarWidget() *ProjectToolbarWidget {
 		fyne.NewMenu("Select",
 			item.SelectAll, item.SelectNone, item.SelectErrors, item.SelectTenMore, item.SelectWithPullRequest, item.SelectWithoutPullRequest))
 
-	item.GitMenu = NewContextMenuButton("GitHub...",
-		fyne.NewMenu("GitHub",
+	item.GitMenu = NewContextMenuButton("Git...",
+		fyne.NewMenu("Git",
 			item.GitCommit, item.GitPush, item.GitOpenPullRequest, item.GitRefreshStatus))
 
 	item.CopyMenu = NewContextMenuButton("Copy...",
