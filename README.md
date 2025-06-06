@@ -16,17 +16,25 @@ See the [walkthrough](docs/walkthrough.md) for example usage.
 
 **Development version instructions**
 
-Assuming you have `go` installed, install Repomancer by:
+Assuming you have `golang` installed, install Repomancer by:
 
 1. Install the GitHub CLI (`gh`): https://cli.github.com/
    ```shell
-   # macOS: 
+   # macOS with homebrew: 
    brew install gh
    ```
 
-2. Install Repomancer:
-    ```shell
-    GOPROXY=direct go install github.com/repomancer/repomancer@v0.0.1
+2. Install GoLang and Repomancer ([GoLang](https://go.dev/doc/install) must be installed):
+   ```shell
+   GOPROXY=direct go install github.com/repomancer/repomancer@v0.0.1
+   ```
+   or clone and build:
+
+   ```shell
+   git clone https://github.com/repomancer/repomancer.git
+   cd repomancer
+   git switch v0.0.1
+   go install
     ```
 
 3. Configure GitHub credentials:
