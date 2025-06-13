@@ -11,15 +11,27 @@ type Repository struct {
 	Host              string
 	Organization      string
 	Name              string
-	BaseDir           string `json:"-"` // Calculated on load, not saved with configuration
-	LogFile           string `json:"-"` // Calculated on load, not saved with configuration
-	jobs              []*Job
-	Status            string
+	BaseDir           string    `json:"-"` // Calculated on load, not saved with configuration
+	LogFile           string    `json:"-"` // Calculated on load, not saved with configuration
+	Jobs              *JobQueue `json:"-"` // Created on load, not saved with configuration
 	Selected          bool
 	PullRequest       *PullRequest
 	LastCommandResult error `json:"-"`
-	mu                sync.Mutex
 	RepositoryStatus  RepositoryStatus
+	OnUpdated         func(repo *Repository) `json:"-"`
+	JobsRunning       bool                   `json:"-"`
+	jobMutex          sync.Mutex
+}
+
+func (r *Repository) changed() {
+	if r.OnUpdated != nil {
+		r.OnUpdated(r)
+	}
+}
+
+func (r *Repository) AddJob(job *Job) {
+	r.Jobs.Add(job)
+	r.changed()
 }
 
 func (r *Repository) GetUrl() *url.URL {
@@ -39,37 +51,47 @@ func (r *Repository) Title() string {
 	return fmt.Sprintf("%s/%s/%s", r.Host, r.Organization, r.Name)
 }
 
+func (r *Repository) RunJobs() {
+	if !r.jobMutex.TryLock() {
+		// If jobs are already running in this repository, return. Any jobs that have been added will be picked up
+		// on the same goroutine that's already running
+		return
+	}
+	defer r.jobMutex.Unlock()
+	r.JobsRunning = true
+	for {
+		job := r.Jobs.Pop()
+		r.changed()
+		if job == nil {
+			break
+		}
+		job.Run()
+	}
+	r.JobsRunning = false
+	r.changed()
+}
+
+func (r *Repository) JobStatus() string {
+	var jobsString string
+	if r.Jobs.Len() > 1 {
+		jobsString = fmt.Sprintf("%d jobs pending", r.Jobs.Len())
+	} else if r.Jobs.Len() == 1 {
+		jobsString = "1 job pending"
+	}
+	if r.JobsRunning {
+		if jobsString != "" {
+			return fmt.Sprintf("Running (%s)", jobsString)
+		} else {
+			return "Running"
+		}
+	} else {
+		return jobsString
+	}
+}
+
 type RepositoryStatus struct {
 	Cloned             bool
 	BranchCreated      bool
 	PullRequestCreated bool
 	PullRequestClosed  bool
-}
-
-func (r *Repository) AddJob(job *Job) {
-	r.mu.Lock()
-	r.jobs = append(r.jobs, job)
-	r.mu.Unlock()
-}
-
-func (r *Repository) GetJob(i int) *Job {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.jobs[i]
-}
-
-func (r *Repository) JobCount() int {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return len(r.jobs)
-}
-
-func (r *Repository) QueuedJobs() int {
-	cnt := 0
-	for i := 0; i < len(r.jobs); i++ {
-		if !r.jobs[i].Finished {
-			cnt++
-		}
-	}
-	return cnt
 }

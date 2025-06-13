@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"fyne.io/fyne/v2"
 	"golang.org/x/sys/unix"
 	"log"
 	"os"
@@ -23,13 +24,16 @@ const (
 	ReposWithoutPullRequest
 )
 
+const RepositoryQueueSize = 512 // Maximum number of queued repositories to work on TODO: real queue instead of channels
+
 type Project struct {
 	mu                     sync.Mutex
 	Name                   string
 	PullRequestTitle       string
 	PullRequestDescription string
 	Repositories           []*Repository
-	ProjectDir             string `json:"-"` // Calculated on load, not saved with configuration
+	ProjectDir             string           `json:"-"` // Calculated on load, not saved with configuration
+	WorkerChannel          chan *Repository `json:"-"`
 }
 
 func (p *Project) Select(selectRange SelectRange) {
@@ -136,6 +140,7 @@ func (p *Project) AddRepository(host, org, name string) error {
 		Name:         name,
 		BaseDir:      path.Join(p.ProjectDir, host, org, name),
 		LogFile:      path.Join(p.ProjectDir, fmt.Sprintf("%s_%s_%s.log", host, org, name)),
+		Jobs:         NewJobQueue(),
 		RepositoryStatus: RepositoryStatus{
 			Cloned:             false,
 			BranchCreated:      false,
@@ -231,30 +236,36 @@ func (p *Project) TotalJobCount() int {
 	defer p.mu.Unlock()
 	cnt := 0
 	for i := 0; i < len(p.Repositories); i++ {
-		cnt += p.GetRepository(i).JobCount()
+		cnt += p.GetRepository(i).Jobs.Len()
 	}
 	return cnt
 }
 
 // DeleteSelectedRepositories removes selected repositories from the project
 // and deletes the files associated with them. It does not remove anything from
-// the remote repository that has already been pushed. Unlike other commands, it
-// only works on things that have been selected, it does not default to all
-// items if none are selected (like AddJobToRepositories, for example)
+// the remote repository that has already been pushed.
+// If no repositories are selected, all repositories are deleted. This should only
+// after giving the user an "are you sure" prompt.
 func (p *Project) DeleteSelectedRepositories() {
+	selectedCount := p.SelectedRepositoryCount()
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	var toDelete []*Repository
 	var toKeep []*Repository
 
-	for i := 0; i < len(p.Repositories); i++ {
-		if p.Repositories[i].Selected {
-			toDelete = append(toDelete, p.Repositories[i])
-		} else {
-			toKeep = append(toKeep, p.Repositories[i])
+	if selectedCount == 0 {
+		toDelete = append(toDelete, p.Repositories...)
+	} else {
+		for i := 0; i < len(p.Repositories); i++ {
+			if p.Repositories[i].Selected {
+				toDelete = append(toDelete, p.Repositories[i])
+			} else {
+				toKeep = append(toKeep, p.Repositories[i])
+			}
 		}
 	}
+
 	p.Repositories = toKeep
 
 	go func() {
@@ -266,6 +277,22 @@ func (p *Project) DeleteSelectedRepositories() {
 		}
 	}()
 	log.Printf("Deleting selected repositories")
+}
+
+func (p *Project) DeleteSelectedLogs() {
+	toDelete := p.SelectedRepositories()
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	go func() {
+		for _, repo := range toDelete {
+			err := os.Remove(repo.LogFile)
+			if err != nil {
+				log.Printf("Failed to remove logfile for %s: %s", repo.Name, err)
+			}
+		}
+	}()
+	log.Printf("Deleting selected repository logs")
 }
 
 func ReadProjectConfig(projectPath string) (*Project, error) {
@@ -287,6 +314,7 @@ func ReadProjectConfig(projectPath string) (*Project, error) {
 		repo := payload.Repositories[i]
 		repo.BaseDir = path.Join(projectPath, repo.Host, repo.Organization, repo.Name)
 		repo.LogFile = path.Join(projectPath, fmt.Sprintf("%s_%s_%s.log", repo.Host, repo.Organization, repo.Name))
+		repo.Jobs = NewJobQueue()
 	}
 
 	return &payload, nil
@@ -297,7 +325,19 @@ func OpenProject(projectPath string) (*Project, error) {
 	if err != nil {
 		return &Project{}, err
 	} else {
+		project.WorkerChannel = make(chan *Repository, RepositoryQueueSize)
+		for w := 1; w <= workerCount(); w++ {
+			go worker(w, project.WorkerChannel)
+		}
 		return project, nil
+	}
+}
+
+func worker(id int, repositories <-chan *Repository) {
+	for repo := range repositories {
+		log.Printf("Worker %d started repository %s", id, repo.Name)
+		repo.RunJobs()
+		log.Printf("Worker %d finished repository %s", id, repo.Name)
 	}
 }
 
@@ -322,6 +362,7 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 				Name:                   name,
 				PullRequestDescription: description,
 				ProjectDir:             projectPath,
+				WorkerChannel:          make(chan *Repository, RepositoryQueueSize),
 			}
 
 			f, _ := os.Create(filepath.Join(projectPath, "config.json"))
@@ -337,11 +378,24 @@ func CreateProject(name, description, projectPath string) (*Project, error) {
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			for w := 1; w <= workerCount(); w++ {
+				go worker(w, project.WorkerChannel)
+			}
 			return &project, nil
 		} else {
 			return &Project{}, err
 		}
 	}
+}
 
-	return &Project{}, err
+// workerCount returns the number of workers to use. This is configurable, but defaults
+// to 1 if the Fyne framework is not running.
+func workerCount() int {
+	currentApp := fyne.CurrentApp()
+	if currentApp != nil {
+		return currentApp.Preferences().IntWithFallback("workerCount", 5)
+	} else {
+		return 1
+	}
 }

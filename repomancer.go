@@ -2,26 +2,32 @@ package main
 
 import (
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/cmd/fyne_demo/data"
+	"github.com/repomancer/repomancer/internal"
+	"github.com/repomancer/repomancer/screen"
 	"log"
 	"os"
-	"repomancer/internal"
-	"repomancer/window"
 )
 
 func main() {
+	a := app.NewWithID("com.sheersky.repomancer")
+	a.SetIcon(data.FyneLogo)
+	screens.LogLifecycle(a)
+	w := a.NewWindow("Repomancer")
 
-	state := internal.State{}
-	state.App = app.NewWithID("com.sheersky.repomancer")
+	w.SetMainMenu(screens.MakeMenu(a, w))
+	w.SetMaster()
 
 	if len(os.Args) < 2 {
-		window := screens.NewStartScreen(&state)
-		window.ShowAndRun()
+		screens.GotoStartScreen(a, w)
 	} else {
 		project, err := internal.OpenProject(os.Args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
-		window := screens.NewProjectWindow(&state, project)
-		window.ShowAndRun()
+		screens.GotoProjectScreen(w, project)
+
 	}
+	w.ShowAndRun()
+
 }

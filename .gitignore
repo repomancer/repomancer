@@ -29,3 +29,6 @@ go.work.sum
 dist/
 
 repomancer
+Repomancer.app/
+*.zip
+.DS_Store
