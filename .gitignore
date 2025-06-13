@@ -25,3 +25,7 @@ go.work.sum
 .env
 
 .idea
+# Added by goreleaser init:
+dist/
+
+repomancer
