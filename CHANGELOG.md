@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.2
+## 0.0.2 2025-06-15
 - Run commands inside `zsh --login` shell. Fixes paths when running as a GUI app.
 - Publish via [HomeBrew cask](https://github.com/repomancer/homebrew-repomancer)
 
