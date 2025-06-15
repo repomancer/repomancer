@@ -14,30 +14,15 @@ See the [walkthrough](docs/walkthrough.md) for example usage.
 
 ## Installation
 
-**Development version instructions**
+**With HomeBrew**
 
-Assuming you have `golang` installed, install Repomancer by:
-
-1. Install the GitHub CLI (`gh`): https://cli.github.com/
+1. Install Repomancer:
    ```shell
-   # macOS with homebrew: 
-   brew install gh
-   ```
-
-2. Install GoLang and Repomancer ([GoLang](https://go.dev/doc/install) must be installed):
-   ```shell
-   GOPROXY=direct go install github.com/repomancer/repomancer@v0.0.1
-   ```
-   or clone and build:
-
-   ```shell
-   git clone https://github.com/repomancer/repomancer.git
-   cd repomancer
-   git switch v0.0.1
-   go install
+   brew tap repomancer/repomancer
+   brew install --no-quarantine repomancer
     ```
 
-3. Configure GitHub credentials:
+2. Configure GitHub credentials:
 
    You **MUST** login to each GitHub host, even if you normally use an SSH key [^1]. **Connect with HTTPS.**
 
@@ -45,8 +30,9 @@ Assuming you have `golang` installed, install Repomancer by:
    # Repeat for each GitHub host you want to use:
    gh auth login
     ```
-4. Run Repomancer:
+3. Run Repomancer:
    ```shell
+   # Launch from Launchpad, or:
    repomancer
     ```
 
