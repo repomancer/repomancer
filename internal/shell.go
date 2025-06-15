@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -16,20 +17,31 @@ func RunCommand(dir string, timeoutSeconds int, command string, args ...string) 
 	defer cancel()
 
 	// Create the command with the context
-	cmd := exec.CommandContext(ctx, command, args...)
+	// Run commands inside ZSH with
+	var myArgs []string
+	myArgs = append(myArgs, "--login")
+	cmd := exec.CommandContext(ctx, ShellToUse, myArgs...)
 
 	// Set the working directory if specified
 	if dir != "" {
 		cmd.Dir = dir
 	}
 
-	// Create buffers to capture stdout and stderr
-	var stdoutBuf, stderrBuf bytes.Buffer
+	// Create buffers for stdin, stdout, stderr
+	var stdoutBuf, stderrBuf, stdinBuf bytes.Buffer
+	stdinBuf.WriteString(command)
+	if !strings.HasSuffix(command, "\n") {
+		stdinBuf.WriteString("\n")
+	}
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
-
+	cmd.Stdin = &stdinBuf
 	// Run the command
 	err = cmd.Run()
+
+	if err != nil {
+		return stdoutBuf.String(), stderrBuf.String(), err
+	}
 
 	// Check if the context deadline was exceeded
 	if errors.Is(context.DeadlineExceeded, ctx.Err()) {

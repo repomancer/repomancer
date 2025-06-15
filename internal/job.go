@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -54,6 +55,7 @@ func (j *Job) Run() {
 	j.StartTime = time.Now()
 	log.Printf("Running %s", j.Command)
 	var logfile io.Writer
+	var shellInput = bytes.NewBuffer([]byte{})
 	var err error
 	if j.InternalCommand {
 		logfile = bytes.NewBuffer([]byte{})
@@ -77,10 +79,17 @@ func (j *Job) Run() {
 		}
 	}
 
-	cmd := exec.Command(ShellToUse, "-c", "-i", j.Command)
+	shellInput.WriteString(j.Command)
+	if !strings.HasSuffix(j.Command, "\n") {
+		shellInput.WriteString("\n")
+	}
+
+	cmd := exec.Command(ShellToUse, "--login")
 	cmd.Dir = j.Directory
 	cmd.Stderr = logfile
 	cmd.Stdout = logfile
+	cmd.Stdin = shellInput
+
 	err = cmd.Start()
 	if err != nil {
 		log.Fatal(err)

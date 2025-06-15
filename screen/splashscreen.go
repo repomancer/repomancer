@@ -16,7 +16,7 @@ import (
 )
 
 func checkRequirements() (string, error) {
-	stdout, stderr, err := internal.RunCommand("", 3, "zsh", "-c", "-i", "gh --version")
+	stdout, stderr, err := internal.RunCommand("", 3, "gh --version")
 	if err != nil {
 		return stderr, err
 	}
