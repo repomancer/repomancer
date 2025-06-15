@@ -1,9 +1,6 @@
 Website = "https://github.com/repomancer/repomancer"
 
 [Details]
-Icon = "Icon.png"
-Name = "Repomancer"
-ID = "com.sheersky.repomancer"
-Version = "0.0.1"
-Build = 1
-
+  Icon = "Icon.png"
+  Name = "Repomancer"
+  ID = "com.sheersky.repomancer"

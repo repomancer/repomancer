@@ -32,3 +32,5 @@ repomancer
 Repomancer.app/
 *.zip
 .DS_Store
+Repomancer-*.dmg
+Repomancer-*.zip
