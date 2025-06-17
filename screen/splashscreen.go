@@ -123,7 +123,7 @@ func GotoStartScreen(app fyne.App, w fyne.Window) {
 				status.SetText(fmt.Sprintf("%s\n%s", msg, "gh must be available on the path. Install it from https://cli.github.com/ and restart Repomancer"))
 				newBtn.Disable()
 				openBtn.Disable()
-				settingsBtn.Disable()
+				settingsBtn.Enable()
 			} else {
 				status.SetText(msg)
 				newBtn.Enable()
