@@ -43,7 +43,7 @@ func NormalizeGitUrl(url string) (string, error) {
 
 func Clone(r *Repository) (string, error) {
 	target := fmt.Sprintf("%s/%s/%s", r.Host, r.Organization, r.Name)
-	stdout, stderr, err := RunCommand(r.BaseDir, 120, "gh", "repo", "clone", target, ".", "--", "--depth=1")
+	stdout, stderr, err := RunCommand(r.BaseDir, 120, fmt.Sprintf("gh repo clone '%s' . -- --depth=1", target))
 	if err != nil {
 		return "", fmt.Errorf("%s", stderr)
 	}
@@ -52,7 +52,7 @@ func Clone(r *Repository) (string, error) {
 }
 
 func CheckoutBranch(r *Repository, branch string) (string, error) {
-	stdout, stderr, err := RunCommand(r.BaseDir, 120, "git", "checkout", "-b", branch)
+	stdout, stderr, err := RunCommand(r.BaseDir, 120, fmt.Sprintf("git checkout -b '%s'", branch))
 	if err != nil {
 		log.Printf("Error checking out branch %s: %s", branch, stderr)
 		return stderr, err
@@ -124,7 +124,7 @@ func NewPRStatusJob(r *Repository) *Job {
 func GetRepositoryInfo(repository string) (RepositoryInfo, error) {
 	var info RepositoryInfo
 
-	stdout, stderr, err := RunCommand("", 20, "gh", "repo", "view", repository, "--json", "name,url,pushedAt")
+	stdout, stderr, err := RunCommand("", 20, fmt.Sprintf("gh repo view '%s' --json name,url,pushedAt", repository))
 	if err != nil {
 		return info, fmt.Errorf("%s", stderr)
 	}

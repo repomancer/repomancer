@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"fyne.io/fyne/v2"
 	"os/exec"
 	"strings"
 	"time"
@@ -12,15 +13,15 @@ import (
 
 // RunCommand is for running a shell command that should NOT be run per repository. For that,
 // create a Job and use Repository.AddJob()
-func RunCommand(dir string, timeoutSeconds int, command string, args ...string) (stdout string, stderr string, err error) {
+func RunCommand(dir string, timeoutSeconds int, command string) (stdout string, stderr string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
 	defer cancel()
 
 	// Create the command with the context
 	// Run commands inside ZSH with
-	var myArgs []string
-	myArgs = append(myArgs, "--login")
-	cmd := exec.CommandContext(ctx, ShellToUse, myArgs...)
+	args := ShellArgs()
+	args = append(args, command)
+	cmd := exec.CommandContext(ctx, ShellToUse(), args...)
 
 	// Set the working directory if specified
 	if dir != "" {
@@ -28,14 +29,9 @@ func RunCommand(dir string, timeoutSeconds int, command string, args ...string) 
 	}
 
 	// Create buffers for stdin, stdout, stderr
-	var stdoutBuf, stderrBuf, stdinBuf bytes.Buffer
-	stdinBuf.WriteString(command)
-	if !strings.HasSuffix(command, "\n") {
-		stdinBuf.WriteString("\n")
-	}
+	var stdoutBuf, stderrBuf bytes.Buffer
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
-	cmd.Stdin = &stdinBuf
 	// Run the command
 	err = cmd.Run()
 
@@ -50,4 +46,24 @@ func RunCommand(dir string, timeoutSeconds int, command string, args ...string) 
 
 	// Return the captured output and any error
 	return stdoutBuf.String(), stderrBuf.String(), err
+}
+
+const DefaultShell = "zsh"
+const DefaultShellArgs = "--login -i -c"
+
+func ShellToUse() string {
+	if fyne.CurrentApp() == nil {
+		return DefaultShell
+	}
+	return fyne.CurrentApp().Preferences().StringWithFallback("shell", DefaultShell)
+}
+
+func ShellArgs() []string {
+	var args string
+	if fyne.CurrentApp() == nil {
+		args = DefaultShellArgs
+	} else {
+		args = fyne.CurrentApp().Preferences().StringWithFallback("shellArguments", DefaultShellArgs)
+	}
+	return strings.Split(args, " ")
 }

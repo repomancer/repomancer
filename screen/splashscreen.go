@@ -92,6 +92,22 @@ func GotoStartScreen(app fyne.App, w fyne.Window) {
 	}
 	settingsBtn.OnTapped = func() {
 		settingsWindow := NewSettingsWindow(app)
+		settingsWindow.SetCloseIntercept(func() {
+			msg, err := checkRequirements()
+			fyne.Do(func() {
+				if err != nil {
+					status.SetText(fmt.Sprintf("%s\n%s", msg, "gh must be available on the path. Install it and restart Repomancer"))
+					newBtn.Disable()
+					openBtn.Disable()
+					settingsBtn.Enable()
+				} else {
+					status.SetText(msg)
+					newBtn.Enable()
+					openBtn.Enable()
+					settingsBtn.Enable()
+				}
+			})
+		})
 		settingsWindow.Show()
 	}
 	quitBtn.OnTapped = func() {

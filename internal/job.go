@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-const ShellToUse = "zsh"
-
 // Job represents a shell command run asynchronously in a specific repository's directory
 // The command's stdout, stderr and error are captured.
 // It is expected (but not specifically enforced) that only a single Job will be executing in
@@ -84,11 +82,13 @@ func (j *Job) Run() {
 		shellInput.WriteString("\n")
 	}
 
-	cmd := exec.Command(ShellToUse, "--login")
+	args := ShellArgs()
+	args = append(args, j.Command)
+
+	cmd := exec.Command(ShellToUse(), args...)
 	cmd.Dir = j.Directory
 	cmd.Stderr = logfile
 	cmd.Stdout = logfile
-	cmd.Stdin = shellInput
 
 	err = cmd.Start()
 	if err != nil {

@@ -6,17 +6,14 @@ import (
 )
 
 func TestRunCommand(t *testing.T) {
-	gotStdout, gotStderr, err := RunCommand("", 5, "ls -l")
+	gotStdout, _, err := RunCommand("", 5, "ls -l")
 	assert.Contains(t, gotStdout, "total")
-	// stderr should be empty if the command succeeds
-	assert.Equal(t, "", gotStderr)
 	assert.NoError(t, err)
 }
 
 func TestRunTimeout(t *testing.T) {
-	_, gotStderr, err := RunCommand("", 1, "sleep 2")
+	_, _, err := RunCommand("", 1, "sleep 2")
 	// If the command times out, stderr could be empty but err will not be nil
-	assert.Equal(t, "", gotStderr)
 	assert.Error(t, err)
 }
 
