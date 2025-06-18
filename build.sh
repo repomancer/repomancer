@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
 FULL_NAME=Repomancer
 # If current commit is tagged with a version tag, set that as the version
