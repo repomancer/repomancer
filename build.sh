@@ -20,7 +20,7 @@ rm -rf "${FULL_NAME}.app" "${FILENAME}-Darwin-arm64.zip" "${FILENAME}-Darwin-arm
 go test ./...
 
 # Package
-fyne package -os darwin --app-build 1 --app-version "${VERSION}"
+go tool fyne package -os darwin --app-build 1 --app-version "${VERSION}"
 zip --symlinks -r "${FILENAME}-Darwin-arm64.zip" "${FULL_NAME}.app/"
 hdiutil create -volname "${FULL_NAME}" -srcfolder "${FULL_NAME}.app" -ov -format UDZO "${FILENAME}-Darwin-arm64.dmg"
 echo "Done"
