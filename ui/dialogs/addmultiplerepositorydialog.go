@@ -27,7 +27,7 @@ func AddMultipleRepositoryDialog(window fyne.Window, project *internal.Project, 
 			}
 		}
 		if len(errors) > 0 {
-			return fmt.Errorf("Invalid: %s", strings.Join(errors, ", "))
+			return fmt.Errorf("invalid: %s", strings.Join(errors, ", "))
 		}
 		return nil
 	}
