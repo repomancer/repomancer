@@ -24,7 +24,7 @@ See the [walkthrough](docs/walkthrough.md) for example usage.
 
 2. Configure GitHub credentials:
 
-   You **MUST** login to each GitHub host, even if you normally use an SSH key [^1]. **Connect with HTTPS.**
+   You **MUST** log in to each GitHub host, even if you normally use an SSH key [^1]. **Connect with HTTPS.**
 
     ```shell
    # Repeat for each GitHub host you want to use:
