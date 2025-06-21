@@ -18,9 +18,9 @@ func TestRunTimeout(t *testing.T) {
 }
 
 func TestRunCommandErrors(t *testing.T) {
-	_, gotStderr, err := RunCommand("", 1, "cat /doesnotexist")
+	_, gotStderr, err := RunCommand("", 1, "cat /does-not-exist")
 	// If the command throws an error, stderr will contain the error
 	// and err will not be nil
-	assert.Contains(t, gotStderr, "cat: /doesnotexist: No such file or directory")
+	assert.Contains(t, gotStderr, "cat: /does-not-exist: No such file or directory")
 	assert.Error(t, err)
 }
