@@ -47,7 +47,7 @@ func NewShortcutHandlingEntry(window fyne.Window) *ShortcutHandlingEntry {
 	item := &ShortcutHandlingEntry{}
 	item.ExtendBaseWidget(item)
 	item.HandleShortcut = func(s *desktop.CustomShortcut) {
-		if s.KeyName == fyne.KeyW && s.Modifier == desktop.SuperModifier {
+		if s.KeyName == fyne.KeyW && s.Modifier == fyne.KeyModifierSuper {
 			window.Close()
 		}
 		if s.KeyName == fyne.KeyEscape {
