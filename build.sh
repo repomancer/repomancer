@@ -5,9 +5,8 @@ FULL_NAME=Repomancer
 # If current commit is tagged with a version tag, set that as the version
 VERSION="0.0.0"
 VERSION_TAG=$(git tag --points-at HEAD)
-if [[ "${VERSION_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
-then
-  VERSION=${VERSION_TAG/#v}
+if [[ "${VERSION_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  VERSION=${VERSION_TAG/#v/}
 fi
 
 echo "${VERSION}"
@@ -18,6 +17,9 @@ rm -rf "${FULL_NAME}.app" "${FILENAME}-Darwin-arm64.zip" "${FILENAME}-Darwin-arm
 
 # Test
 go test ./...
+echo "Searching for dead code..."
+go tool deadcode ./... | tee out && [ ! -s out ]
+echo "Pass"
 
 # Package
 go tool fyne package -os darwin --app-build 1 --app-version "${VERSION}"
