@@ -1,11 +1,11 @@
-package screens
+package dialogs
 
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/repomancer/repomancer/internal"
-	"github.com/repomancer/repomancer/screen/widgets"
+	"github.com/repomancer/repomancer/ui/widgets"
 	"log"
 )
 

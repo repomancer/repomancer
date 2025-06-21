@@ -1,4 +1,9 @@
 # Changelog
+## 0.0.4 
+- Fixed issues with Settings/About windows opening
+- Added Close Project to Menu
+- Use OS cut/copy/paste shortcuts
+
 ## 0.0.3 2025-06-17
 - Add configuration option for shell and arguments used to run commands
 - Allow access settings menu even if program requirements (gh) fail

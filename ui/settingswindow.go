@@ -1,36 +1,21 @@
-package screens
+package ui
 
 import (
 	"errors"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"github.com/repomancer/repomancer/screen/widgets"
+	"github.com/repomancer/repomancer/ui/widgets"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 )
 
-var settingsWindow fyne.Window
-
-func NewSettingsWindow(a fyne.App) fyne.Window {
-	if settingsWindow != nil {
-		return settingsWindow
-	}
-	w := a.NewWindow("Settings")
-	cmdW := &desktop.CustomShortcut{KeyName: fyne.KeyW, Modifier: fyne.KeyModifierSuper}
-	w.Canvas().AddShortcut(cmdW, func(shortcut fyne.Shortcut) {
-		w.Close()
-	})
-	w.SetOnClosed(func() {
-		settingsWindow = nil
-		log.Println("Settings screen closed")
-	})
-
+func NewSettingsWindow(ui *BaseUI) fyne.Window {
+	w := ui.NewWindow("Settings")
 	locationLbl := widgets.NewLabelWithHelpWidget("Default Location", "Directory where new projects will be created", w)
 	locationEntry := widget.NewEntry()
 	workerCountLbl := widgets.NewLabelWithHelpWidget("Workers", "Number of concurrent workers used for running shell commands\nTakes effect when Project is opened", w)
@@ -57,10 +42,10 @@ func NewSettingsWindow(a fyne.App) fyne.Window {
 		log.Fatal(err)
 	}
 
-	existing := a.Preferences().StringWithFallback("baseDirectory", dirname)
+	existing := ui.App.Preferences().StringWithFallback("baseDirectory", dirname)
 	locationEntry.Text = existing
 
-	existingWorkerCount := a.Preferences().IntWithFallback("workerCount", 5)
+	existingWorkerCount := ui.App.Preferences().IntWithFallback("workerCount", 5)
 	workerCount.SetText(strconv.Itoa(existingWorkerCount))
 	workerCount.Validator = func(s string) error {
 		val, err := strconv.Atoi(s)
@@ -74,7 +59,7 @@ func NewSettingsWindow(a fyne.App) fyne.Window {
 		return nil
 	}
 
-	shell.SetText(a.Preferences().StringWithFallback("shell", "/bin/zsh"))
+	shell.SetText(ui.App.Preferences().StringWithFallback("shell", "/bin/zsh"))
 	shell.Validator = func(s string) error {
 		_, err := os.Stat(s)
 		if err != nil {
@@ -82,7 +67,7 @@ func NewSettingsWindow(a fyne.App) fyne.Window {
 		}
 		return nil
 	}
-	shellArgs.SetText(a.Preferences().StringWithFallback("shellArguments", "--login --interactive"))
+	shellArgs.SetText(ui.App.Preferences().StringWithFallback("shellArguments", "--login --interactive"))
 	okButton.OnTapped = func() {
 		saveSettings(okButton, locationEntry, workerCount, shell, shellArgs, errorLabel, w)
 	}
@@ -95,7 +80,6 @@ func NewSettingsWindow(a fyne.App) fyne.Window {
 
 	w.Resize(fyne.NewSize(500, 300))
 	w.SetContent(container.NewVBox(form, widget.NewSeparator(), container.NewGridWithColumns(2, okButton, cancelButton), errorLabel))
-	settingsWindow = w
 	return w
 }
 

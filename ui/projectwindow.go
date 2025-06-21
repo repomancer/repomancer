@@ -1,4 +1,4 @@
-package screens
+package ui
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 	"github.com/repomancer/repomancer/internal"
-	"github.com/repomancer/repomancer/screen/widgets"
+	"github.com/repomancer/repomancer/ui/dialogs"
+	"github.com/repomancer/repomancer/ui/widgets"
 	"log"
 	"os"
 	"path"
@@ -14,21 +15,22 @@ import (
 	"strings"
 )
 
-func GotoProjectScreen(w fyne.Window, project *internal.Project) {
+func NewProjectWindow(b *BaseUI, project *internal.Project) *fyne.Window {
+	w := b.NewWindow("Repomancer - " + project.Name)
+
 	pw := widgets.NewProjectWidget()
 	pw.LoadProject(project)
 
 	w.Resize(fyne.NewSize(1000, 800))
 	w.SetContent(pw)
-	w.SetTitle(fmt.Sprintf("Repomancer - %s", project.Name))
 
 	pw.Toolbar.AddRepository.Action = func() {
-		d, entry := AddRepositoryDialog(w, project, func() { pw.Refresh() })
+		d, entry := dialogs.AddRepositoryDialog(w, project, func() { pw.Refresh() })
 		d.Show()
 		w.Canvas().Focus(entry)
 	}
 	pw.Toolbar.AddMultipleRepositories.Action = func() {
-		d, entry := AddMultipleRepositoryDialog(w, project, func() {
+		d, entry := dialogs.AddMultipleRepositoryDialog(w, project, func() {
 			pw.Refresh()
 		})
 
@@ -142,7 +144,7 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		pw.ExecuteJobQueue()
 	}
 	pw.Toolbar.GitOpenPullRequest.Action = func() {
-		d, entry := PullRequestDialog(w, project, func(title, description string) {
+		d, entry := dialogs.PullRequestDialog(w, project, func(title, description string) {
 			project.PullRequestTitle = title
 			project.PullRequestDescription = description
 			err := project.SaveProject()
@@ -247,10 +249,12 @@ func GotoProjectScreen(w fyne.Window, project *internal.Project) {
 		pw.ExecuteJobQueue()
 	}
 
-	w.SetOnClosed(func() {
+	w.SetCloseIntercept(func() {
 		err := project.SaveProject()
 		if err != nil {
 			log.Printf("Error saving project: %s", err)
 		}
+		w.Close()
 	})
+	return &w
 }
