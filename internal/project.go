@@ -84,7 +84,7 @@ func (p *Project) Select(selectRange SelectRange) {
 		}
 
 	default:
-		panic("unhandled default case")
+		log.Fatalf("unhandled default case in Project.Select")
 	}
 }
 
