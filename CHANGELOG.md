@@ -1,5 +1,5 @@
 # Changelog
-## 0.0.4 
+## 0.0.4 2025-06-22
 - Fixed issues with Settings/About windows opening
 - Added Close Project to Menu
 - Use OS cut/copy/paste shortcuts
