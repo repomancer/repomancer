@@ -3,6 +3,7 @@
 - Fixed issues with Settings/About windows opening
 - Added Close Project to Menu
 - Use OS cut/copy/paste shortcuts
+- Improved Project Statistics dialog
 
 ## 0.0.3 2025-06-17
 - Add configuration option for shell and arguments used to run commands

@@ -11,7 +11,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"sort"
 	"strings"
 )
 
@@ -203,30 +202,8 @@ func NewProjectWindow(b *BaseUI, project *internal.Project) *fyne.Window {
 	}
 
 	pw.Toolbar.ProjectStatistics.Action = func() {
-		prStatusMap := make(map[string]int)
-
-		for i := 0; i < project.RepositoryCount(); i++ {
-			r := project.GetRepository(i)
-			if r.PullRequest == nil {
-				continue
-			}
-			prStatusMap[r.PullRequest.Status]++
-		}
-
-		var msg []string
-		msg = append(msg, fmt.Sprintf("Repositories: %d", project.RepositoryCount()))
-		msg = append(msg, "Pull Requests:")
-
-		var keys []string
-		for k := range prStatusMap {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, k := range keys {
-			msg = append(msg, fmt.Sprintf("%s: %d", k, prStatusMap[k]))
-		}
-
-		dialog.ShowInformation("Project Statistics", strings.Join(msg, "\n"), w)
+		d := dialogs.NewStatisticsDialog(w, project)
+		d.Show()
 	}
 
 	pw.CommandInput.OnChanged = func(s string) {
